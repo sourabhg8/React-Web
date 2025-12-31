@@ -1,0 +1,254 @@
+import SearchResultItem from '../SearchResultItem';
+import styles from './SearchResults.module.css';
+
+/**
+ * SearchResults Component
+ * Displays search results with pagination and metadata
+ */
+const SearchResults = ({ 
+  searchResponse, 
+  isLoading, 
+  error, 
+  onResultClick, 
+  onPageChange,
+  onFilterChange 
+}) => {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loadingState}>
+          <div className={styles.spinner}></div>
+          <p>Searching...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.errorState}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <h3>Search Error</h3>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // No results state
+  if (!searchResponse || searchResponse.results?.length === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.emptyState}>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+          <h3>No results found</h3>
+          <p>
+            {searchResponse?.sanitizedQuery 
+              ? `No results for "${searchResponse.sanitizedQuery}"`
+              : 'Try adjusting your search terms or filters'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { 
+    results, 
+    totalResults, 
+    pageNumber, 
+    pageSize, 
+    totalPages, 
+    hasNextPage, 
+    hasPreviousPage,
+    searchTimeMs,
+    sanitizedQuery,
+    facetCounts
+  } = searchResponse;
+
+  // Group facets by type
+  const typeFacets = Object.entries(facetCounts || {})
+    .filter(([key]) => key.startsWith('type:'))
+    .map(([key, count]) => ({ name: key.replace('type:', ''), count }));
+
+  const categoryFacets = Object.entries(facetCounts || {})
+    .filter(([key]) => key.startsWith('category:'))
+    .map(([key, count]) => ({ name: key.replace('category:', ''), count }));
+
+  return (
+    <div className={styles.container}>
+      {/* Results Header */}
+      <div className={styles.header}>
+        <div className={styles.resultInfo}>
+          <h2 className={styles.resultCount}>
+            <span className={styles.countNumber}>{totalResults}</span>
+            {totalResults === 1 ? ' result' : ' results'}
+            {sanitizedQuery && (
+              <span className={styles.queryText}> for "{sanitizedQuery}"</span>
+            )}
+          </h2>
+          <span className={styles.searchTime}>
+            ({searchTimeMs}ms)
+          </span>
+        </div>
+
+        {/* Facet Filters */}
+        {(typeFacets.length > 0 || categoryFacets.length > 0) && (
+          <div className={styles.facets}>
+            {typeFacets.length > 0 && (
+              <div className={styles.facetGroup}>
+                <span className={styles.facetLabel}>Type:</span>
+                {typeFacets.map(facet => (
+                  <button
+                    key={facet.name}
+                    className={styles.facetButton}
+                    onClick={() => onFilterChange?.({ type: facet.name })}
+                  >
+                    {facet.name}
+                    <span className={styles.facetCount}>{facet.count}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Results List */}
+      <div className={styles.resultsList}>
+        {results.map((result, index) => (
+          <SearchResultItem
+            key={result.id || index}
+            result={result}
+            onClick={onResultClick}
+          />
+        ))}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <div className={styles.paginationInfo}>
+            Showing {((pageNumber - 1) * pageSize) + 1} - {Math.min(pageNumber * pageSize, totalResults)} of {totalResults}
+          </div>
+          
+          <div className={styles.paginationControls}>
+            <button
+              className={styles.pageButton}
+              onClick={() => onPageChange?.(1)}
+              disabled={pageNumber === 1}
+              aria-label="First page"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="11 17 6 12 11 7" />
+                <polyline points="18 17 13 12 18 7" />
+              </svg>
+            </button>
+            
+            <button
+              className={styles.pageButton}
+              onClick={() => onPageChange?.(pageNumber - 1)}
+              disabled={!hasPreviousPage}
+              aria-label="Previous page"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+
+            {/* Page Numbers */}
+            <div className={styles.pageNumbers}>
+              {generatePageNumbers(pageNumber, totalPages).map((page, index) => (
+                page === '...' ? (
+                  <span key={`ellipsis-${index}`} className={styles.ellipsis}>...</span>
+                ) : (
+                  <button
+                    key={page}
+                    className={`${styles.pageNumber} ${page === pageNumber ? styles.active : ''}`}
+                    onClick={() => onPageChange?.(page)}
+                    aria-current={page === pageNumber ? 'page' : undefined}
+                  >
+                    {page}
+                  </button>
+                )
+              ))}
+            </div>
+
+            <button
+              className={styles.pageButton}
+              onClick={() => onPageChange?.(pageNumber + 1)}
+              disabled={!hasNextPage}
+              aria-label="Next page"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+            
+            <button
+              className={styles.pageButton}
+              onClick={() => onPageChange?.(totalPages)}
+              disabled={pageNumber === totalPages}
+              aria-label="Last page"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="13 17 18 12 13 7" />
+                <polyline points="6 17 11 12 6 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Generate array of page numbers to display
+ */
+function generatePageNumbers(current, total) {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const pages = [];
+  
+  // Always show first page
+  pages.push(1);
+  
+  if (current > 3) {
+    pages.push('...');
+  }
+  
+  // Show pages around current
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  
+  if (current < total - 2) {
+    pages.push('...');
+  }
+  
+  // Always show last page
+  if (total > 1) {
+    pages.push(total);
+  }
+  
+  return pages;
+}
+
+export default SearchResults;
+

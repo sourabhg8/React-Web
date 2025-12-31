@@ -1,0 +1,158 @@
+/* Page Container */
+.page {
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  background: var(--gradient-hero);
+}
+
+.container {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+}
+
+/* Email Cell */
+.email {
+  color: var(--text-secondary);
+}
+
+/* Role Badge */
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  text-transform: capitalize;
+}
+
+.org_admin {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.org_user {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+/* Empty State Icon */
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Reset Password Modal */
+.resetPasswordModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.resetPasswordIcon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-warning-light, rgba(245, 158, 11, 0.1));
+  border-radius: var(--radius-full);
+  color: var(--color-warning, #f59e0b);
+  margin-bottom: var(--spacing-lg);
+}
+
+.resetPasswordIcon.success {
+  background: var(--color-success-light, rgba(34, 197, 94, 0.1));
+  color: var(--color-success, #22c55e);
+}
+
+.resetPasswordIcon.error {
+  background: var(--color-error-light, rgba(239, 68, 68, 0.1));
+  color: var(--color-error, #ef4444);
+}
+
+.resetPasswordText {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.resetPasswordText.success {
+  color: var(--color-success, #22c55e);
+}
+
+.resetPasswordText.error {
+  color: var(--color-error, #ef4444);
+}
+
+.resetPasswordHint {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.resetPasswordActions {
+  display: flex;
+  gap: var(--spacing-md);
+  width: 100%;
+  justify-content: center;
+}
+
+.cancelBtn,
+.closeBtn {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover,
+.closeBtn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.resetBtn {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  border: none;
+  background: var(--color-warning, #f59e0b);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resetBtn:hover:not(:disabled) {
+  background: var(--color-warning-dark, #d97706);
+}
+
+.resetBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+}

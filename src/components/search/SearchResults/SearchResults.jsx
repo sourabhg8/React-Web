@@ -2,16 +2,39 @@ import SearchResultItem from '../SearchResultItem';
 import styles from './SearchResults.module.css';
 
 /**
- * SearchResults Component
- * Displays search results with pagination and metadata
+ * Parse facetCounts from API into groups by field name.
+ * API returns { "source:PubMed": 30, "year:2024": 20 } -> { source: [{ value: "PubMed", count: 30 }], year: [...] }
  */
-const SearchResults = ({ 
-  searchResponse, 
-  isLoading, 
-  error, 
-  onResultClick, 
+function parseFacetCounts(facetCounts) {
+  if (!facetCounts || typeof facetCounts !== 'object') return { source: [], year: [] };
+  const groups = { source: [], year: [] };
+  for (const [key, count] of Object.entries(facetCounts)) {
+    const colon = key.indexOf(':');
+    if (colon === -1) continue;
+    const field = key.slice(0, colon);
+    const value = key.slice(colon + 1);
+    if (field in groups) {
+      groups[field].push({ value, count });
+    }
+  }
+  // Sort by count descending
+  groups.source.sort((a, b) => b.count - a.count);
+  groups.year.sort((a, b) => b.count - a.count);
+  return groups;
+}
+
+/**
+ * SearchResults Component
+ * Shows Year and Source facets at the top, then results from search API with pagination.
+ */
+const SearchResults = ({
+  searchResponse,
+  isLoading,
+  error,
+  selectedFilters = {},
+  onResultClick,
   onPageChange,
-  onFilterChange 
+  onFacetClick,
 }) => {
   // Loading state
   if (isLoading) {
@@ -63,30 +86,70 @@ const SearchResults = ({
     );
   }
 
-  const { 
-    results, 
-    totalResults, 
-    pageNumber, 
-    pageSize, 
-    totalPages, 
-    hasNextPage, 
-    hasPreviousPage,
-    searchTimeMs,
-    sanitizedQuery,
-    facetCounts
+  const {
+    results = [],
+    totalResults = 0,
+    pageNumber = 1,
+    pageSize = 10,
+    totalPages = 0,
+    hasNextPage = false,
+    hasPreviousPage = false,
+    searchTimeMs = 0,
+    sanitizedQuery = '',
+    facetCounts = {},
   } = searchResponse;
 
-  // Group facets by type
-  const typeFacets = Object.entries(facetCounts || {})
-    .filter(([key]) => key.startsWith('type:'))
-    .map(([key, count]) => ({ name: key.replace('type:', ''), count }));
+  const { source: sourceFacets, year: yearFacets } = parseFacetCounts(facetCounts);
+  const selectedSource = selectedFilters.source ?? [];
+  const selectedYear = selectedFilters.year ?? [];
 
-  const categoryFacets = Object.entries(facetCounts || {})
-    .filter(([key]) => key.startsWith('category:'))
-    .map(([key, count]) => ({ name: key.replace('category:', ''), count }));
+  const isFacetSelected = (field, value) =>
+    (selectedFilters[field] ?? []).includes(value);
 
   return (
     <div className={styles.container}>
+      {/* Facets at the top: Source and Year */}
+      {(sourceFacets.length > 0 || yearFacets.length > 0) && (
+        <div className={styles.facetsTop}>
+          {sourceFacets.length > 0 && (
+            <div className={styles.facetGroup}>
+              <span className={styles.facetLabel}>Source</span>
+              <div className={styles.facetChips}>
+                {sourceFacets.map(({ value, count }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`${styles.facetButton} ${isFacetSelected('source', value) ? styles.facetButtonSelected : ''}`}
+                    onClick={() => onFacetClick?.('source', value)}
+                  >
+                    {value}
+                    <span className={styles.facetCount}>{count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {yearFacets.length > 0 && (
+            <div className={styles.facetGroup}>
+              <span className={styles.facetLabel}>Year</span>
+              <div className={styles.facetChips}>
+                {yearFacets.map(({ value, count }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`${styles.facetButton} ${isFacetSelected('year', value) ? styles.facetButtonSelected : ''}`}
+                    onClick={() => onFacetClick?.('year', value)}
+                  >
+                    {value}
+                    <span className={styles.facetCount}>{count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Results Header */}
       <div className={styles.header}>
         <div className={styles.resultInfo}>
@@ -94,34 +157,13 @@ const SearchResults = ({
             <span className={styles.countNumber}>{totalResults}</span>
             {totalResults === 1 ? ' result' : ' results'}
             {sanitizedQuery && (
-              <span className={styles.queryText}> for "{sanitizedQuery}"</span>
+              <span className={styles.queryText}> for &quot;{sanitizedQuery}&quot;</span>
             )}
           </h2>
           <span className={styles.searchTime}>
             ({searchTimeMs}ms)
           </span>
         </div>
-
-        {/* Facet Filters */}
-        {(typeFacets.length > 0 || categoryFacets.length > 0) && (
-          <div className={styles.facets}>
-            {typeFacets.length > 0 && (
-              <div className={styles.facetGroup}>
-                <span className={styles.facetLabel}>Type:</span>
-                {typeFacets.map(facet => (
-                  <button
-                    key={facet.name}
-                    className={styles.facetButton}
-                    onClick={() => onFilterChange?.({ type: facet.name })}
-                  >
-                    {facet.name}
-                    <span className={styles.facetCount}>{facet.count}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Results List */}

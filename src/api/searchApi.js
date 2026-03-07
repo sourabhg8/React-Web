@@ -1,23 +1,23 @@
 import { get, post } from './apiClient';
 
 /**
- * Search API endpoints
+ * Search API endpoints (POST /api/Search)
  */
-const SEARCH_ENDPOINT = '/search';
+const SEARCH_ENDPOINT = '/Search';
 
 /**
  * Search API service
+ * Backend returns { success, message, data: SearchResponse, correlationId }
  */
 export const searchApi = {
   /**
-   * Perform a search with full options
-   * @param {Object} searchRequest - Search request object
-   * @param {string} searchRequest.searchQuery - The search query
-   * @param {number} searchRequest.pageNumber - Page number (default: 1)
-   * @param {number} searchRequest.pageSize - Results per page (default: 10)
-   * @param {string} [searchRequest.category] - Optional category filter
-   * @param {string} [searchRequest.type] - Optional type filter
-   * @returns {Promise<Object>} - Search response with results and pagination
+   * Perform a search (POST) with query, pagination and filters.
+   * @param {Object} searchRequest - Search request
+   * @param {string} searchRequest.searchQuery - Search text
+   * @param {number} searchRequest.pageNumber - Page (1-based)
+   * @param {number} searchRequest.pageSize - Page size
+   * @param {Object} [searchRequest.filters] - Filters/selected facets e.g. { source: ["PubMed"], year: ["2024"] }
+   * @returns {Promise<Object>} - API response; use response.data for SearchResponse (results, facetCounts, etc.)
    */
   search: (searchRequest) => {
     return post(SEARCH_ENDPOINT, searchRequest, { showLoader: true });
@@ -39,6 +39,7 @@ export const searchApi = {
     return get(`${SEARCH_ENDPOINT}?${params}`, { showLoader: false });
   },
 };
+
 
 export default searchApi;
 

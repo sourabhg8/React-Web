@@ -148,39 +148,43 @@ const SearchResultItem = ({ result, onClick }) => {
           </p>
         )}
 
-        {/* Footer with metadata */}
+        {/* Footer with metadata from search API response */}
         <div className={styles.footer}>
-          <span className={styles.date}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            {formatDate(result.createdAt)}
-          </span>
+          {(result.createdAt || result.metadata?.year) && (
+            <span className={styles.date}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              {result.createdAt ? formatDate(result.createdAt) : result.metadata?.year ?? '—'}
+            </span>
+          )}
 
-          {result.metadata?.readTime && (
+          {(result.metadata?.readTime || result.metadata?.pmcid || result.metadata?.pmid) && (
             <span className={styles.readTime}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
-              {result.metadata.readTime}
+              {result.metadata.readTime || result.metadata.pmcid || result.metadata.pmid}
             </span>
           )}
 
-          {result.metadata?.author && (
+          {(result.metadata?.authors || result.metadata?.author) && (
             <span className={styles.author}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-              {result.metadata.author}
+              {result.metadata.authors || result.metadata.author}
             </span>
           )}
 
-          <span className={styles.relevance}>
-            Relevance: {result.relevanceScore}%
-          </span>
+          {typeof result.relevanceScore === 'number' && (
+            <span className={styles.relevance}>
+              Relevance: {result.relevanceScore}%
+            </span>
+          )}
         </div>
       </div>
 

@@ -13,9 +13,10 @@ const Search = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  // Filters/selected facets: { source: ["PubMed"], year: ["2024"] } - sent to search API
   const [currentFilters, setCurrentFilters] = useState({});
 
-  // Perform search
+  // Perform search (POST with searchQuery, pageNumber, pageSize, filters)
   const performSearch = useCallback(async (query, page = 1, filters = {}) => {
     if (!query.trim()) {
       setError('Please enter a search query');
@@ -28,13 +29,13 @@ const Search = () => {
 
     try {
       const response = await searchApi.search({
-        searchQuery: query,
+        searchQuery: query.trim(),
         pageNumber: page,
         pageSize: 10,
-        ...filters,
+        filters: Object.keys(filters).length ? filters : undefined,
       });
-
-      setSearchResponse(response.data);
+      // API returns { success, message, data: SearchResponse, correlationId }
+      setSearchResponse(response.data ?? response);
     } catch (err) {
       console.error('Search error:', err);
       setError(err.data?.message || err.message || 'Search failed. Please try again.');
@@ -44,25 +45,33 @@ const Search = () => {
     }
   }, []);
 
-  // Handle search form submit
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentFilters({});
     performSearch(searchQuery, 1, {});
   };
 
-  // Handle page change
   const handlePageChange = (page) => {
     performSearch(searchQuery, page, currentFilters);
-    // Scroll to top of results
     window.scrollTo({ top: 200, behavior: 'smooth' });
   };
 
-  // Handle filter change
-  const handleFilterChange = (newFilters) => {
-    const updatedFilters = { ...currentFilters, ...newFilters };
-    setCurrentFilters(updatedFilters);
-    performSearch(searchQuery, 1, updatedFilters);
+  // Toggle a facet value (add/remove from filters and re-search)
+  const handleFacetClick = (field, value) => {
+    const current = currentFilters[field] ?? [];
+    const isSelected = current.includes(value);
+    const next = isSelected
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    const updated = next.length
+      ? { ...currentFilters, [field]: next }
+      : (() => {
+          const rest = { ...currentFilters };
+          delete rest[field];
+          return rest;
+        })();
+    setCurrentFilters(updated);
+    performSearch(searchQuery, 1, updated);
   };
 
   // Handle result click
@@ -209,9 +218,10 @@ const Search = () => {
               searchResponse={searchResponse}
               isLoading={isLoading}
               error={error}
+              selectedFilters={currentFilters}
               onResultClick={handleResultClick}
               onPageChange={handlePageChange}
-              onFilterChange={handleFilterChange}
+              onFacetClick={handleFacetClick}
             />
           </div>
         )}

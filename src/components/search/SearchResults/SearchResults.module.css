@@ -41,18 +41,26 @@
   color: var(--text-muted);
 }
 
-/* Facets */
-.facets {
+/* Facets at top */
+.facetsTop {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .facetGroup {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--spacing-xs);
+}
+
+.facetChips {
+  display: flex;
   flex-wrap: wrap;
+  gap: var(--spacing-xs);
 }
 
 .facetLabel {
@@ -81,6 +89,13 @@
   background: var(--color-primary-light);
   border-color: var(--color-primary);
   color: var(--color-primary);
+}
+
+.facetButtonSelected {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .facetCount {

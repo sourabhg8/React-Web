@@ -88,16 +88,35 @@ const SearchResults = ({
 
   const {
     results = [],
-    totalResults = 0,
-    pageNumber = 1,
-    pageSize = 10,
-    totalPages = 0,
-    hasNextPage = false,
-    hasPreviousPage = false,
+    totalResults: rawTotal = 0,
+    pageNumber: rawPageNum = 1,
+    pageSize: rawPageSize = 10,
+    totalPages: rawTotalPages = 0,
+    hasNextPage: rawHasNext,
+    hasPreviousPage: rawHasPrev,
     searchTimeMs = 0,
     sanitizedQuery = '',
     facetCounts = {},
   } = searchResponse;
+
+  const aiSummary =
+    searchResponse.aiSummary ?? searchResponse.AiSummary ?? undefined;
+
+  const totalResults = Number(rawTotal) || 0;
+  const pageNumber = Math.max(1, Number(rawPageNum) || 1);
+  const pageSize = Math.max(1, Number(rawPageSize) || 10);
+  const totalPagesFromApi = Number(rawTotalPages);
+  const totalPages =
+    Number.isFinite(totalPagesFromApi) && totalPagesFromApi >= 0
+      ? totalPagesFromApi
+      : Math.max(0, Math.ceil(totalResults / pageSize));
+
+  const hasPreviousPage =
+    typeof rawHasPrev === 'boolean' ? rawHasPrev : pageNumber > 1;
+  const hasNextPage =
+    typeof rawHasNext === 'boolean'
+      ? rawHasNext
+      : totalPages > 0 && pageNumber < totalPages;
 
   const { source: sourceFacets, year: yearFacets } = parseFacetCounts(facetCounts);
   const selectedSource = selectedFilters.source ?? [];
@@ -150,6 +169,14 @@ const SearchResults = ({
         </div>
       )}
 
+      {/* Google-style featured answer (only when API returns aiSummary) */}
+      {typeof aiSummary === 'string' && aiSummary.trim().length > 0 && (
+        <div className={styles.featuredAnswer} role="region" aria-label="AI summary">
+          <div className={styles.featuredAnswerLabel}>AI overview</div>
+          <p className={styles.featuredAnswerText}>{aiSummary.trim()}</p>
+        </div>
+      )}
+
       {/* Results Header */}
       <div className={styles.header}>
         <div className={styles.resultInfo}>
@@ -178,7 +205,7 @@ const SearchResults = ({
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalResults > 0 && totalPages > 1 && (
         <div className={styles.pagination}>
           <div className={styles.paginationInfo}>
             Showing {((pageNumber - 1) * pageSize) + 1} - {Math.min(pageNumber * pageSize, totalResults)} of {totalResults}
@@ -215,9 +242,10 @@ const SearchResults = ({
                   <span key={`ellipsis-${index}`} className={styles.ellipsis}>...</span>
                 ) : (
                   <button
-                    key={page}
+                    key={`page-${page}-${index}`}
                     className={`${styles.pageNumber} ${page === pageNumber ? styles.active : ''}`}
-                    onClick={() => onPageChange?.(page)}
+                    type="button"
+                    onClick={() => typeof page === 'number' && onPageChange?.(page)}
                     aria-current={page === pageNumber ? 'page' : undefined}
                   >
                     {page}

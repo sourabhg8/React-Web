@@ -28,9 +28,10 @@ const Search = () => {
     setHasSearched(true);
 
     try {
+      const pageNum = Math.max(1, Number.parseInt(String(page), 10) || 1);
       const response = await searchApi.search({
         searchQuery: query.trim(),
-        pageNumber: page,
+        pageNumber: pageNum,
         pageSize: 10,
         filters: Object.keys(filters).length ? filters : undefined,
       });
@@ -52,7 +53,8 @@ const Search = () => {
   };
 
   const handlePageChange = (page) => {
-    performSearch(searchQuery, page, currentFilters);
+    const p = typeof page === 'number' && !Number.isNaN(page) ? page : Number.parseInt(String(page), 10);
+    performSearch(searchQuery, Number.isFinite(p) && p > 0 ? p : 1, currentFilters);
     window.scrollTo({ top: 200, behavior: 'smooth' });
   };
 

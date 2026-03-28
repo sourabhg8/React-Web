@@ -41,6 +41,34 @@
   color: var(--text-muted);
 }
 
+/* Google-style featured AI answer */
+.featuredAnswer {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  border-left: 4px solid var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.featuredAnswerLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.featuredAnswerText {
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
 /* Facets at top */
 .facetsTop {
   display: flex;

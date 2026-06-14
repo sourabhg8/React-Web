@@ -15,6 +15,7 @@ const Search = () => {
   const [hasSearched, setHasSearched] = useState(false);
   // Filters/selected facets: { source: ["PubMed"], year: ["2024"] } - sent to search API
   const [currentFilters, setCurrentFilters] = useState({});
+  const [peakRelevanceScore, setPeakRelevanceScore] = useState(null);
 
   // Perform search (POST with searchQuery, pageNumber, pageSize, filters)
   const performSearch = useCallback(async (query, page = 1, filters = {}) => {
@@ -29,14 +30,25 @@ const Search = () => {
 
     try {
       const pageNum = Math.max(1, Number.parseInt(String(page), 10) || 1);
-      const response = await searchApi.search({
+      const searchPayload = {
         searchQuery: query.trim(),
         pageNumber: pageNum,
         pageSize: 10,
         filters: Object.keys(filters).length ? filters : undefined,
-      });
+      };
+      if (pageNum > 1 && peakRelevanceScore != null) {
+        searchPayload.peakRelevanceScore = peakRelevanceScore;
+      }
+
+      const response = await searchApi.search(searchPayload);
       // API returns { success, message, data: SearchResponse, correlationId }
-      setSearchResponse(response.data ?? response);
+      const data = response.data ?? response;
+
+      if (pageNum === 1) {
+        setPeakRelevanceScore(data.peakRelevanceScore ?? data.PeakRelevanceScore ?? null);
+      }
+
+      setSearchResponse(data);
     } catch (err) {
       console.error('Search error:', err);
       setError(err.data?.message || err.message || 'Search failed. Please try again.');
@@ -44,11 +56,12 @@ const Search = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [peakRelevanceScore]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentFilters({});
+    setPeakRelevanceScore(null);
     performSearch(searchQuery, 1, {});
   };
 
@@ -73,6 +86,7 @@ const Search = () => {
           return rest;
         })();
     setCurrentFilters(updated);
+    setPeakRelevanceScore(null);
     performSearch(searchQuery, 1, updated);
   };
 
@@ -89,6 +103,7 @@ const Search = () => {
   const handleQuickSearch = (term) => {
     setSearchQuery(term);
     setCurrentFilters({});
+    setPeakRelevanceScore(null);
     performSearch(term, 1, {});
   };
 
@@ -99,6 +114,7 @@ const Search = () => {
     setHasSearched(false);
     setError(null);
     setCurrentFilters({});
+    setPeakRelevanceScore(null);
   };
 
   return (

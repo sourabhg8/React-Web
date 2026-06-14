@@ -89,12 +89,23 @@ const formatDate = (dateString) => {
 };
 
 /**
+ * Resolve document title from API (camelCase or PascalCase).
+ */
+const getDocumentTitle = (result) =>
+  result.documentTitle ??
+  result.DocumentTitle ??
+  result.metadata?.documentTitle ??
+  result.metadata?.DocumentTitle ??
+  '';
+
+/**
  * SearchResultItem Component
  * Displays a single search result item
  */
 const SearchResultItem = ({ result, onClick }) => {
   const icon = TypeIcons[result.type] || TypeIcons.default;
   const typeColorClass = getTypeColorClass(result.type);
+  const documentTitle = getDocumentTitle(result);
 
   const handleClick = () => {
     if (onClick) {
@@ -150,6 +161,15 @@ const SearchResultItem = ({ result, onClick }) => {
 
         {/* Footer with metadata from search API response */}
         <div className={styles.footer}>
+          <span className={styles.documentTitle}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            <span className={styles.documentTitleLabel}>Document title:</span>
+            {documentTitle || '—'}
+          </span>
+
           {(result.createdAt || result.metadata?.year) && (
             <span className={styles.date}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

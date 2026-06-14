@@ -190,10 +190,21 @@
 
 .date,
 .readTime,
-.author {
+.author,
+.documentTitle {
   background: var(--bg-secondary);
   padding: 2px 8px;
   border-radius: var(--radius-sm);
+}
+
+.documentTitle {
+  flex: 1 1 100%;
+  line-height: 1.4;
+}
+
+.documentTitleLabel {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
 }
 
 .relevance {

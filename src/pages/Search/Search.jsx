@@ -1,14 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { SearchResults } from '../../components/search';
 import { searchApi } from '../../api/searchApi';
+import { loadRecentSearches, saveRecentSearch } from '../../utils/recentSearchStorage';
 import styles from './Search.module.css';
-
-const EXAMPLE_QUERIES = [
-  'type 2 diabetes treatment',
-  'cardiovascular disease prevention',
-  'immunotherapy oncology',
-  'hypertension clinical guidelines',
-];
 
 /**
  * Research search — hybrid AI search over indexed medical literature.
@@ -21,6 +15,11 @@ const Search = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [currentFilters, setCurrentFilters] = useState({});
   const [peakRelevanceScore, setPeakRelevanceScore] = useState(null);
+  const [recentQueries, setRecentQueries] = useState([]);
+
+  useEffect(() => {
+    setRecentQueries(loadRecentSearches());
+  }, []);
 
   const performSearch = useCallback(async (query, page = 1, filters = {}) => {
     if (!query.trim()) {
@@ -49,6 +48,7 @@ const Search = () => {
 
       if (pageNum === 1) {
         setPeakRelevanceScore(data.peakRelevanceScore ?? data.PeakRelevanceScore ?? null);
+        setRecentQueries(saveRecentSearch(query.trim()));
       }
 
       setSearchResponse(data);
@@ -98,7 +98,7 @@ const Search = () => {
     }
   };
 
-  const handleExampleQuery = (term) => {
+  const handleRecentQuery = (term) => {
     setSearchQuery(term);
     setCurrentFilters({});
     setPeakRelevanceScore(null);
@@ -170,26 +170,21 @@ const Search = () => {
           </div>
         </form>
 
-        {!hasSearched && (
-          <div className={styles.hints}>
-            <div className={styles.exampleQueries}>
-              <span className={styles.hintLabel}>Try:</span>
-              {EXAMPLE_QUERIES.map((term) => (
+        {!hasSearched && recentQueries.length > 0 && (
+          <div className={styles.recentSearches}>
+            <span className={styles.recentLabel}>Recent:</span>
+            <div className={styles.recentTags}>
+              {recentQueries.map((term) => (
                 <button
                   key={term}
                   type="button"
-                  className={styles.exampleTag}
-                  onClick={() => handleExampleQuery(term)}
+                  className={styles.recentTag}
+                  onClick={() => handleRecentQuery(term)}
                 >
                   {term}
                 </button>
               ))}
             </div>
-            <ul className={styles.tipsList}>
-              <li>Results are ranked by relevance across PubMed, PMC, and indexed sources</li>
-              <li>Filter by publication year and source after your first search</li>
-              <li>AI summaries appear on the first page of results for each query</li>
-            </ul>
           </div>
         )}
 

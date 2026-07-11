@@ -68,7 +68,9 @@ const getTypeColorClass = (type) => {
 };
 
 /**
- * SearchResultItem Component
+ * Resolve document title from API (camelCase or PascalCase).
+ */
+const getDocumentTitle = (result) =>
   result.documentTitle ??
   result.DocumentTitle ??
   result.metadata?.documentTitle ??

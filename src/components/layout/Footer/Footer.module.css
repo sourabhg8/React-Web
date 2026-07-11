@@ -82,6 +82,12 @@
   color: var(--color-primary);
 }
 
+.linkMuted {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  line-height: var(--line-height-relaxed);
+}
+
 /* Bottom Section */
 .bottom {
   display: flex;

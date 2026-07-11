@@ -68,34 +68,18 @@ const getTypeColorClass = (type) => {
 };
 
 /**
- * Format date for display
- */
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now - date);
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  
-  return date.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-  });
-};
-
-/**
- * Resolve document title from API (camelCase or PascalCase).
- */
-const getDocumentTitle = (result) =>
+ * SearchResultItem Component
   result.documentTitle ??
   result.DocumentTitle ??
   result.metadata?.documentTitle ??
   result.metadata?.DocumentTitle ??
+  '';
+
+const getPublicationYear = (result) =>
+  result.year ??
+  result.Year ??
+  result.metadata?.year ??
+  result.metadata?.Year ??
   '';
 
 /**
@@ -106,6 +90,7 @@ const SearchResultItem = ({ result, onClick }) => {
   const icon = TypeIcons[result.type] || TypeIcons.default;
   const typeColorClass = getTypeColorClass(result.type);
   const documentTitle = getDocumentTitle(result);
+  const publicationYear = getPublicationYear(result);
 
   const handleClick = () => {
     if (onClick) {
@@ -170,13 +155,13 @@ const SearchResultItem = ({ result, onClick }) => {
             {documentTitle || '—'}
           </span>
 
-          {(result.createdAt || result.metadata?.year) && (
+          {publicationYear && (
             <span className={styles.date}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              {result.createdAt ? formatDate(result.createdAt) : result.metadata?.year ?? '—'}
+              Year: {publicationYear}
             </span>
           )}
 

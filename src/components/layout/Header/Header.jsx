@@ -69,7 +69,13 @@ const Header = () => {
             Home
           </Link>
 
-          {isAuthenticated && (
+          {isAuthenticated && (user?.role === ROLES.ORG_USER || user?.role === "org_user") && (
+            <Link to={ROUTES.SEARCH} className={styles.navLink}>
+              Research Search
+            </Link>
+          )}
+
+          {isAuthenticated && user?.role !== ROLES.ORG_USER && user?.role !== "org_user" && (
             <Link to={getDashboardRoute()} className={styles.navLink}>
               Dashboard
             </Link>

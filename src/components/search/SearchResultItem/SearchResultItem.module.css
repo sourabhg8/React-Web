@@ -23,6 +23,42 @@
   box-shadow: var(--shadow-lg), 0 0 0 3px var(--color-primary-light);
 }
 
+.aiInfoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-top: 6px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--border-color));
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 12%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary) 6%, var(--bg-card)) 100%
+  );
+  color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.aiInfoButton:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 22%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary) 12%, var(--bg-card)) 100%
+  );
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.aiInfoButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 /* Icon Wrapper */
 .iconWrapper {
   display: flex;

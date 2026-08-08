@@ -1,8 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
-import { SearchResults } from '../../components/search';
+import { SearchResults, DocumentAdcInfoModal } from '../../components/search';
 import { searchApi } from '../../api/searchApi';
 import { loadRecentSearches, saveRecentSearch } from '../../utils/recentSearchStorage';
 import styles from './Search.module.css';
+
+const mapPreferredTerms = (response) => {
+  const data = response?.data ?? response;
+  const terms = data?.searchTerms ?? data?.SearchTerms ?? [];
+  return Array.isArray(terms) ? terms : [];
+};
 
 /**
  * Research search — hybrid AI search over indexed medical literature.
@@ -16,10 +22,28 @@ const Search = () => {
   const [currentFilters, setCurrentFilters] = useState({});
   const [peakRelevanceScore, setPeakRelevanceScore] = useState(null);
   const [recentQueries, setRecentQueries] = useState([]);
+  const [savedSearches, setSavedSearches] = useState([]);
+  const [isSavingSearch, setIsSavingSearch] = useState(false);
+  const [saveMessage, setSaveMessage] = useState(null);
+  const [adcModalOpen, setAdcModalOpen] = useState(false);
+  const [adcModalTitle, setAdcModalTitle] = useState('');
+  const [adcModalData, setAdcModalData] = useState(null);
+  const [adcModalLoading, setAdcModalLoading] = useState(false);
+  const [adcModalError, setAdcModalError] = useState(null);
+
+  const loadSavedSearches = useCallback(async () => {
+    try {
+      const response = await searchApi.getPreferredSearches();
+      setSavedSearches(mapPreferredTerms(response));
+    } catch (err) {
+      console.error('Failed to load saved searches:', err);
+    }
+  }, []);
 
   useEffect(() => {
     setRecentQueries(loadRecentSearches());
-  }, []);
+    loadSavedSearches();
+  }, [loadSavedSearches]);
 
   const performSearch = useCallback(async (query, page = 1, filters = {}) => {
     if (!query.trim()) {
@@ -30,6 +54,7 @@ const Search = () => {
     setIsLoading(true);
     setError(null);
     setHasSearched(true);
+    setSaveMessage(null);
 
     try {
       const pageNum = Math.max(1, Number.parseInt(String(page), 10) || 1);
@@ -98,11 +123,77 @@ const Search = () => {
     }
   };
 
+  const handleDocumentInfoClick = useCallback(async (documentTitle) => {
+    if (!documentTitle?.trim()) return;
+
+    setAdcModalTitle(documentTitle.trim());
+    setAdcModalOpen(true);
+    setAdcModalData(null);
+    setAdcModalError(null);
+    setAdcModalLoading(true);
+
+    try {
+      const response = await searchApi.getDocumentAdcInfo(
+        documentTitle.trim(),
+        searchQuery.trim() || undefined
+      );
+      const data = response?.data ?? response;
+      setAdcModalData(data);
+    } catch (err) {
+      console.error('Document ADC info error:', err);
+      setAdcModalError(err.data?.message || err.message || 'Failed to load ADC information.');
+    } finally {
+      setAdcModalLoading(false);
+    }
+  }, [searchQuery]);
+
+  const handleCloseAdcModal = () => {
+    setAdcModalOpen(false);
+    setAdcModalTitle('');
+    setAdcModalData(null);
+    setAdcModalError(null);
+    setAdcModalLoading(false);
+  };
+
   const handleRecentQuery = (term) => {
     setSearchQuery(term);
     setCurrentFilters({});
     setPeakRelevanceScore(null);
     performSearch(term, 1, {});
+  };
+
+  const handleSavedQuery = async (term) => {
+    setSearchQuery(term);
+    setCurrentFilters({});
+    setPeakRelevanceScore(null);
+
+    try {
+      const response = await searchApi.recordPreferredSearch(term);
+      setSavedSearches(mapPreferredTerms(response));
+    } catch (err) {
+      console.error('Failed to record saved search:', err);
+    }
+
+    performSearch(term, 1, {});
+  };
+
+  const handleSaveSearch = async () => {
+    const term = searchQuery.trim();
+    if (!term) return;
+
+    setIsSavingSearch(true);
+    setSaveMessage(null);
+
+    try {
+      const response = await searchApi.savePreferredSearch(term);
+      setSavedSearches(mapPreferredTerms(response));
+      setSaveMessage('Search saved');
+    } catch (err) {
+      console.error('Failed to save search:', err);
+      setSaveMessage(err.data?.message || err.message || 'Could not save search');
+    } finally {
+      setIsSavingSearch(false);
+    }
   };
 
   const handleClearSearch = () => {
@@ -112,7 +203,12 @@ const Search = () => {
     setError(null);
     setCurrentFilters({});
     setPeakRelevanceScore(null);
+    setSaveMessage(null);
   };
+
+  const isCurrentQuerySaved = savedSearches.some(
+    (item) => item.searchTerm?.toLowerCase() === searchQuery.trim().toLowerCase()
+  );
 
   return (
     <div className={styles.page}>
@@ -167,24 +263,56 @@ const Search = () => {
                 'Search'
               )}
             </button>
+            <button
+              type="button"
+              className={styles.saveBtn}
+              onClick={handleSaveSearch}
+              disabled={!searchQuery.trim() || isSavingSearch || isCurrentQuerySaved}
+              title={isCurrentQuerySaved ? 'Already saved' : 'Save this search'}
+            >
+              {isSavingSearch ? 'Saving...' : isCurrentQuerySaved ? 'Saved' : 'Save search'}
+            </button>
           </div>
+          {saveMessage && <p className={styles.saveMessage}>{saveMessage}</p>}
         </form>
 
-        {!hasSearched && recentQueries.length > 0 && (
-          <div className={styles.recentSearches}>
-            <span className={styles.recentLabel}>Recent:</span>
-            <div className={styles.recentTags}>
-              {recentQueries.map((term) => (
-                <button
-                  key={term}
-                  type="button"
-                  className={styles.recentTag}
-                  onClick={() => handleRecentQuery(term)}
-                >
-                  {term}
-                </button>
-              ))}
-            </div>
+        {!hasSearched && (recentQueries.length > 0 || savedSearches.length > 0) && (
+          <div className={styles.queryShortcuts}>
+            {savedSearches.length > 0 && (
+              <div className={styles.recentSearches}>
+                <span className={styles.recentLabel}>Saved:</span>
+                <div className={styles.recentTags}>
+                  {savedSearches.map((item) => (
+                    <button
+                      key={item.searchTerm}
+                      type="button"
+                      className={`${styles.recentTag} ${styles.savedTag}`}
+                      onClick={() => handleSavedQuery(item.searchTerm)}
+                    >
+                      {item.searchTerm}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {recentQueries.length > 0 && (
+              <div className={styles.recentSearches}>
+                <span className={styles.recentLabel}>Recent:</span>
+                <div className={styles.recentTags}>
+                  {recentQueries.map((term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      className={styles.recentTag}
+                      onClick={() => handleRecentQuery(term)}
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -196,11 +324,21 @@ const Search = () => {
               error={error}
               selectedFilters={currentFilters}
               onResultClick={handleResultClick}
+              onDocumentInfoClick={handleDocumentInfoClick}
               onPageChange={handlePageChange}
               onFacetClick={handleFacetClick}
             />
           </div>
         )}
+
+        <DocumentAdcInfoModal
+          isOpen={adcModalOpen}
+          onClose={handleCloseAdcModal}
+          documentTitle={adcModalTitle}
+          isLoading={adcModalLoading}
+          error={adcModalError}
+          data={adcModalData}
+        />
       </div>
     </div>
   );

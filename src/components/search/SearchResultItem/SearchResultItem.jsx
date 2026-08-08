@@ -88,7 +88,7 @@ const getPublicationYear = (result) =>
  * SearchResultItem Component
  * Displays a single search result item
  */
-const SearchResultItem = ({ result, onClick }) => {
+const SearchResultItem = ({ result, onClick, onInfoClick }) => {
   const icon = TypeIcons[result.type] || TypeIcons.default;
   const typeColorClass = getTypeColorClass(result.type);
   const documentTitle = getDocumentTitle(result);
@@ -106,6 +106,13 @@ const SearchResultItem = ({ result, onClick }) => {
     }
   };
 
+  const handleInfoClick = (e) => {
+    e.stopPropagation();
+    if (onInfoClick && documentTitle) {
+      onInfoClick(documentTitle);
+    }
+  };
+
   return (
     <article 
       className={styles.resultItem}
@@ -115,6 +122,31 @@ const SearchResultItem = ({ result, onClick }) => {
       role="button"
       aria-label={`View ${result.title}`}
     >
+      {/* AI-generated document info */}
+      <button
+        type="button"
+        className={styles.aiInfoButton}
+        onClick={handleInfoClick}
+        disabled={!documentTitle}
+        aria-label={documentTitle ? `View AI-generated summary for ${documentTitle}` : 'Document title unavailable'}
+        title={documentTitle ? 'AI document summary' : 'Document title unavailable'}
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M12 3l1.1 3.9L17 8l-3.9 1.1L12 13l-1.1-3.9L7 8l3.9-1.1L12 3z" fill="currentColor" stroke="none" />
+          <path d="M19 14l.7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7L19 14z" fill="currentColor" stroke="none" opacity="0.75" />
+        </svg>
+      </button>
+
       {/* Type Icon */}
       <div className={`${styles.iconWrapper} ${typeColorClass}`}>
         {icon}

@@ -33,7 +33,6 @@ const SearchResults = ({
   error,
   selectedFilters = {},
   onResultClick,
-  onDocumentInfoClick,
   onPageChange,
   onFacetClick,
 }) => {
@@ -201,7 +200,6 @@ const SearchResults = ({
             key={result.id || index}
             result={result}
             onClick={onResultClick}
-            onInfoClick={onDocumentInfoClick}
           />
         ))}
       </div>

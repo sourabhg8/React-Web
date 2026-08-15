@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { SearchResults, DocumentAdcInfoModal } from '../../components/search';
+import { SearchResults } from '../../components/search';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import { searchApi } from '../../api/searchApi';
 import { loadRecentSearches, saveRecentSearch } from '../../utils/recentSearchStorage';
+import { PREFERRED_SEARCHES_UPDATED } from '../../utils/preferredSearchEvents';
 import styles from './Search.module.css';
 
 const mapPreferredTerms = (response) => {
@@ -25,11 +27,8 @@ const Search = () => {
   const [savedSearches, setSavedSearches] = useState([]);
   const [isSavingSearch, setIsSavingSearch] = useState(false);
   const [saveMessage, setSaveMessage] = useState(null);
-  const [adcModalOpen, setAdcModalOpen] = useState(false);
-  const [adcModalTitle, setAdcModalTitle] = useState('');
-  const [adcModalData, setAdcModalData] = useState(null);
-  const [adcModalLoading, setAdcModalLoading] = useState(false);
-  const [adcModalError, setAdcModalError] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeletingSaved, setIsDeletingSaved] = useState(false);
 
   const loadSavedSearches = useCallback(async () => {
     try {
@@ -43,6 +42,15 @@ const Search = () => {
   useEffect(() => {
     setRecentQueries(loadRecentSearches());
     loadSavedSearches();
+
+    const handlePreferredSearchesUpdated = () => {
+      loadSavedSearches();
+    };
+
+    window.addEventListener(PREFERRED_SEARCHES_UPDATED, handlePreferredSearchesUpdated);
+    return () => {
+      window.removeEventListener(PREFERRED_SEARCHES_UPDATED, handlePreferredSearchesUpdated);
+    };
   }, [loadSavedSearches]);
 
   const performSearch = useCallback(async (query, page = 1, filters = {}) => {
@@ -123,38 +131,6 @@ const Search = () => {
     }
   };
 
-  const handleDocumentInfoClick = useCallback(async (documentTitle) => {
-    if (!documentTitle?.trim()) return;
-
-    setAdcModalTitle(documentTitle.trim());
-    setAdcModalOpen(true);
-    setAdcModalData(null);
-    setAdcModalError(null);
-    setAdcModalLoading(true);
-
-    try {
-      const response = await searchApi.getDocumentAdcInfo(
-        documentTitle.trim(),
-        searchQuery.trim() || undefined
-      );
-      const data = response?.data ?? response;
-      setAdcModalData(data);
-    } catch (err) {
-      console.error('Document ADC info error:', err);
-      setAdcModalError(err.data?.message || err.message || 'Failed to load ADC information.');
-    } finally {
-      setAdcModalLoading(false);
-    }
-  }, [searchQuery]);
-
-  const handleCloseAdcModal = () => {
-    setAdcModalOpen(false);
-    setAdcModalTitle('');
-    setAdcModalData(null);
-    setAdcModalError(null);
-    setAdcModalLoading(false);
-  };
-
   const handleRecentQuery = (term) => {
     setSearchQuery(term);
     setCurrentFilters({});
@@ -206,6 +182,21 @@ const Search = () => {
     setSaveMessage(null);
   };
 
+  const handleDeleteSavedSearch = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeletingSaved(true);
+    try {
+      const response = await searchApi.deletePreferredSearch(deleteTarget);
+      setSavedSearches(mapPreferredTerms(response));
+      setDeleteTarget(null);
+    } catch (err) {
+      console.error('Failed to delete saved search:', err);
+    } finally {
+      setIsDeletingSaved(false);
+    }
+  };
+
   const isCurrentQuerySaved = savedSearches.some(
     (item) => item.searchTerm?.toLowerCase() === searchQuery.trim().toLowerCase()
   );
@@ -213,13 +204,6 @@ const Search = () => {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <header className={styles.searchHeader}>
-          <h1 className={styles.title}>Research Search</h1>
-          <p className={styles.subtitle}>
-            Search indexed medical literature with AI-powered relevance ranking and summaries
-          </p>
-        </header>
-
         <form className={styles.searchForm} onSubmit={handleSearch}>
           <div className={styles.searchWrapper}>
             <svg
@@ -283,14 +267,27 @@ const Search = () => {
                 <span className={styles.recentLabel}>Saved:</span>
                 <div className={styles.recentTags}>
                   {savedSearches.map((item) => (
-                    <button
-                      key={item.searchTerm}
-                      type="button"
-                      className={`${styles.recentTag} ${styles.savedTag}`}
-                      onClick={() => handleSavedQuery(item.searchTerm)}
-                    >
-                      {item.searchTerm}
-                    </button>
+                    <div key={item.searchTerm} className={styles.savedTagItem}>
+                      <button
+                        type="button"
+                        className={`${styles.recentTag} ${styles.savedTag}`}
+                        onClick={() => handleSavedQuery(item.searchTerm)}
+                      >
+                        {item.searchTerm}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.savedTagDelete}
+                        onClick={() => setDeleteTarget(item.searchTerm)}
+                        aria-label={`Delete saved search ${item.searchTerm}`}
+                        title="Delete saved search"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -324,20 +321,20 @@ const Search = () => {
               error={error}
               selectedFilters={currentFilters}
               onResultClick={handleResultClick}
-              onDocumentInfoClick={handleDocumentInfoClick}
               onPageChange={handlePageChange}
               onFacetClick={handleFacetClick}
             />
           </div>
         )}
 
-        <DocumentAdcInfoModal
-          isOpen={adcModalOpen}
-          onClose={handleCloseAdcModal}
-          documentTitle={adcModalTitle}
-          isLoading={adcModalLoading}
-          error={adcModalError}
-          data={adcModalData}
+        <ConfirmModal
+          isOpen={Boolean(deleteTarget)}
+          onClose={() => !isDeletingSaved && setDeleteTarget(null)}
+          onConfirm={handleDeleteSavedSearch}
+          title="Delete saved search"
+          message={deleteTarget ? `Remove "${deleteTarget}" from your saved searches?` : ''}
+          confirmLabel="Delete"
+          isLoading={isDeletingSaved}
         />
       </div>
     </div>

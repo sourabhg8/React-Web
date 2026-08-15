@@ -1,6 +1,6 @@
 .page {
   min-height: calc(100vh - var(--header-height) - var(--footer-height));
-  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-2xl);
+  padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-2xl);
   background: var(--bg-secondary);
 }
 
@@ -216,6 +216,49 @@
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: var(--color-primary-light);
+}
+
+.savedTagItem {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  background: rgba(79, 70, 229, 0.06);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.savedTagItem .savedTag {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  max-width: 240px;
+}
+
+.savedTagItem .savedTag:hover {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.savedTagDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin-right: 2px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.savedTagDelete:hover {
+  background: rgba(220, 38, 38, 0.12);
+  color: var(--color-error, #dc2626);
 }
 
 /* Results */

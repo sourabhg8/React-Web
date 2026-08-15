@@ -1,4 +1,4 @@
-import { get, post } from './apiClient';
+import { get, post, del } from './apiClient';
 
 /**
  * Search API endpoints (POST /api/Search)
@@ -31,6 +31,12 @@ export const searchApi = {
 
   recordPreferredSearch: (searchTerm) =>
     post(`${PREFERRED_SEARCH_ENDPOINT}/record`, { searchTerm }, { showLoader: false }),
+
+  deletePreferredSearch: (searchTerm) =>
+    del(`${PREFERRED_SEARCH_ENDPOINT}?searchTerm=${encodeURIComponent(searchTerm)}`, { showLoader: false }),
+
+  deleteAllPreferredSearches: () =>
+    del(`${PREFERRED_SEARCH_ENDPOINT}/all`, { showLoader: false }),
 
   getDocumentAdcInfo: (documentTitle, searchQuery) =>
     post(`${SEARCH_ENDPOINT}/document-adc-info`, { documentTitle, searchQuery }, { showLoader: false }),

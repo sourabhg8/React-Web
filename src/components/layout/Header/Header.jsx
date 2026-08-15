@@ -8,7 +8,10 @@ import {
 } from "../../../store/slices/authSlice";
 import { openLoginModal } from "../../../store/slices/uiSlice";
 import { ROLES, ROUTES } from "../../../utils/constants";
+import { searchApi } from "../../../api/searchApi";
+import { notifyPreferredSearchesUpdated } from "../../../utils/preferredSearchEvents";
 import ChangePasswordModal from "../../auth/ChangePasswordModal";
+import ConfirmModal from "../../common/ConfirmModal";
 import styles from "./Header.module.css";
 
 const Header = () => {
@@ -17,6 +20,10 @@ const Header = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showDeleteAllSaved, setShowDeleteAllSaved] = useState(false);
+  const [isDeletingAllSaved, setIsDeletingAllSaved] = useState(false);
+
+  const isOrgUser = user?.role === ROLES.ORG_USER || user?.role === "org_user";
 
   const handleLoginClick = () => {
     dispatch(openLoginModal());
@@ -25,6 +32,19 @@ const Header = () => {
   const handleLogout = () => {
     dispatch(logout());
     navigate(ROUTES.HOME);
+  };
+
+  const handleDeleteAllSavedSearches = async () => {
+    setIsDeletingAllSaved(true);
+    try {
+      await searchApi.deleteAllPreferredSearches();
+      notifyPreferredSearchesUpdated();
+      setShowDeleteAllSaved(false);
+    } catch (err) {
+      console.error("Failed to delete all saved searches:", err);
+    } finally {
+      setIsDeletingAllSaved(false);
+    }
   };
 
   const getDashboardRoute = () => {
@@ -71,7 +91,7 @@ const Header = () => {
 
           {isAuthenticated && (user?.role === ROLES.ORG_USER || user?.role === "org_user") && (
             <Link to={ROUTES.SEARCH} className={styles.navLink}>
-              Research Search
+              Research Paper Search
             </Link>
           )}
 
@@ -132,6 +152,25 @@ const Header = () => {
                   </svg>
                   <span>Change Password</span>
                 </button>
+                {isOrgUser && (
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => setShowDeleteAllSaved(true)}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    <span>Delete all saved searches</span>
+                  </button>
+                )}
                 <div className={styles.dropdownDivider}></div>
                 <button
                   className={styles.dropdownLogout}
@@ -184,6 +223,16 @@ const Header = () => {
       <ChangePasswordModal
         isOpen={showChangePassword}
         onClose={() => setShowChangePassword(false)}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteAllSaved}
+        onClose={() => !isDeletingAllSaved && setShowDeleteAllSaved(false)}
+        onConfirm={handleDeleteAllSavedSearches}
+        title="Delete all saved searches"
+        message="This will permanently remove all your saved search terms. This action cannot be undone."
+        confirmLabel="Delete all"
+        isLoading={isDeletingAllSaved}
       />
     </header>
   );

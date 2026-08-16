@@ -29,6 +29,7 @@ const Search = () => {
   const [saveMessage, setSaveMessage] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeletingSaved, setIsDeletingSaved] = useState(false);
+  const [savedSearchLastSearchedAt, setSavedSearchLastSearchedAt] = useState(null);
 
   const loadSavedSearches = useCallback(async () => {
     try {
@@ -98,6 +99,7 @@ const Search = () => {
     e.preventDefault();
     setCurrentFilters({});
     setPeakRelevanceScore(null);
+    setSavedSearchLastSearchedAt(null);
     performSearch(searchQuery, 1, {});
   };
 
@@ -122,6 +124,7 @@ const Search = () => {
         })();
     setCurrentFilters(updated);
     setPeakRelevanceScore(null);
+    setSavedSearchLastSearchedAt(null);
     performSearch(searchQuery, 1, updated);
   };
 
@@ -135,13 +138,21 @@ const Search = () => {
     setSearchQuery(term);
     setCurrentFilters({});
     setPeakRelevanceScore(null);
+    setSavedSearchLastSearchedAt(null);
     performSearch(term, 1, {});
   };
 
-  const handleSavedQuery = async (term) => {
+  const handleSavedQuery = async (savedItem) => {
+    const term = savedItem.searchTerm ?? savedItem.SearchTerm;
+    const lastSearchedAt =
+      savedItem.searchTermLastSearchedAt ?? savedItem.SearchTermLastSearchedAt ?? null;
+
+    setSavedSearchLastSearchedAt(lastSearchedAt);
     setSearchQuery(term);
     setCurrentFilters({});
     setPeakRelevanceScore(null);
+
+    performSearch(term, 1, {});
 
     try {
       const response = await searchApi.recordPreferredSearch(term);
@@ -149,8 +160,6 @@ const Search = () => {
     } catch (err) {
       console.error('Failed to record saved search:', err);
     }
-
-    performSearch(term, 1, {});
   };
 
   const handleSaveSearch = async () => {
@@ -180,6 +189,7 @@ const Search = () => {
     setCurrentFilters({});
     setPeakRelevanceScore(null);
     setSaveMessage(null);
+    setSavedSearchLastSearchedAt(null);
   };
 
   const handleDeleteSavedSearch = async () => {
@@ -271,7 +281,7 @@ const Search = () => {
                       <button
                         type="button"
                         className={`${styles.recentTag} ${styles.savedTag}`}
-                        onClick={() => handleSavedQuery(item.searchTerm)}
+                        onClick={() => handleSavedQuery(item)}
                       >
                         {item.searchTerm}
                       </button>
@@ -323,6 +333,7 @@ const Search = () => {
               onResultClick={handleResultClick}
               onPageChange={handlePageChange}
               onFacetClick={handleFacetClick}
+              savedSearchLastSearchedAt={savedSearchLastSearchedAt}
             />
           </div>
         )}

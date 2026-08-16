@@ -1,3 +1,8 @@
+import {
+  getPublishDate,
+  formatPublishDate,
+  isResultNewSinceSavedSearch,
+} from '../../../utils/searchResultDates';
 import styles from './SearchResultItem.module.css';
 
 /**
@@ -80,19 +85,43 @@ const getDocumentTitle = (result) =>
 const getPublicationYear = (result) =>
   result.year ??
   result.Year ??
+  result.publishYear ??
+  result.PublishYear ??
+  result.metadata?.publishYear ??
+  result.metadata?.PublishYear ??
   result.metadata?.year ??
   result.metadata?.Year ??
   '';
+
+const getAuthors = (result) => {
+  const authors = result.authors ?? result.Authors;
+  if (Array.isArray(authors) && authors.length > 0) {
+    return authors.map((name) => String(name).trim()).filter(Boolean);
+  }
+
+  const raw = result.metadata?.authors ?? result.metadata?.Authors ?? '';
+  if (!raw) return [];
+
+  return String(raw)
+    .split(/[,;]/)
+    .map((name) => name.trim())
+    .filter(Boolean);
+};
+
+const formatAuthors = (result) => getAuthors(result).join(', ');
 
 /**
  * SearchResultItem Component
  * Displays a single search result item
  */
-const SearchResultItem = ({ result, onClick }) => {
+const SearchResultItem = ({ result, onClick, savedSearchLastSearchedAt }) => {
   const icon = TypeIcons[result.type] || TypeIcons.default;
   const typeColorClass = getTypeColorClass(result.type);
   const documentTitle = getDocumentTitle(result);
-  const publicationYear = getPublicationYear(result);
+  const publishDateRaw = getPublishDate(result);
+  const publishDateDisplay = formatPublishDate(publishDateRaw);
+  const authorsDisplay = formatAuthors(result);
+  const isNew = isResultNewSinceSavedSearch(publishDateRaw, savedSearchLastSearchedAt);
 
   const handleClick = () => {
     if (onClick) {
@@ -115,6 +144,12 @@ const SearchResultItem = ({ result, onClick }) => {
       role="button"
       aria-label={`View ${result.title}`}
     >
+      {isNew && (
+        <span className={styles.newBadge} aria-label="New result since last saved search">
+          New
+        </span>
+      )}
+
       {/* Type Icon */}
       <div className={`${styles.iconWrapper} ${typeColorClass}`}>
         {icon}
@@ -157,13 +192,34 @@ const SearchResultItem = ({ result, onClick }) => {
             {documentTitle || '—'}
           </span>
 
-          {publicationYear && (
+          {authorsDisplay && (
+            <span className={styles.author}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span className={styles.authorLabel}>Authors:</span>
+              {authorsDisplay}
+            </span>
+          )}
+
+          {publishDateDisplay && (
             <span className={styles.date}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              Year: {publicationYear}
+              Published: {publishDateDisplay}
+            </span>
+          )}
+
+          {!publishDateDisplay && getPublicationYear(result) && (
+            <span className={styles.date}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              Year: {getPublicationYear(result)}
             </span>
           )}
 
@@ -174,16 +230,6 @@ const SearchResultItem = ({ result, onClick }) => {
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
               {result.metadata.readTime || result.metadata.pmcid || result.metadata.pmid}
-            </span>
-          )}
-
-          {(result.metadata?.authors || result.metadata?.author) && (
-            <span className={styles.author}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              {result.metadata.authors || result.metadata.author}
             </span>
           )}
 

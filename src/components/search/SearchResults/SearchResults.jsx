@@ -3,24 +3,93 @@ import styles from './SearchResults.module.css';
 
 /**
  * Parse facetCounts from API into groups by field name.
- * API returns { "source:PubMed": 30, "year:2024": 20 } -> { source: [{ value: "PubMed", count: 30 }], year: [...] }
+ * API returns { "source:PubMed": 30, "publishYear:2024": 20 } -> { source: [...], publishYear: [...] }
  */
+const YEAR_FACET_FIELD = 'publishYear';
+
 function parseFacetCounts(facetCounts) {
-  if (!facetCounts || typeof facetCounts !== 'object') return { source: [], year: [] };
-  const groups = { source: [], year: [] };
+  if (!facetCounts || typeof facetCounts !== 'object') {
+    return { source: [], [YEAR_FACET_FIELD]: [] };
+  }
+  const groups = { source: [], [YEAR_FACET_FIELD]: [] };
   for (const [key, count] of Object.entries(facetCounts)) {
     const colon = key.indexOf(':');
     if (colon === -1) continue;
-    const field = key.slice(0, colon);
+    let field = key.slice(0, colon);
     const value = key.slice(colon + 1);
+    if (field === 'year') field = YEAR_FACET_FIELD;
     if (field in groups) {
       groups[field].push({ value, count });
     }
   }
-  // Sort by count descending
   groups.source.sort((a, b) => b.count - a.count);
-  groups.year.sort((a, b) => b.count - a.count);
+  groups[YEAR_FACET_FIELD].sort((a, b) => b.count - a.count);
   return groups;
+}
+
+function mergeFacetOptions(facets, selectedValues = []) {
+  const map = new Map(facets.map(({ value, count }) => [value, count]));
+  selectedValues.forEach((value) => {
+    if (!map.has(value)) map.set(value, 0);
+  });
+  return Array.from(map.entries())
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count || String(a.value).localeCompare(String(b.value)));
+}
+
+function FacetsBar({
+  sourceFacets,
+  yearFacets,
+  selectedFilters,
+  onFacetClick,
+  isFacetSelected: isFacetSelectedProp,
+}) {
+  const isFacetSelected =
+    isFacetSelectedProp ??
+    ((field, value) => (selectedFilters[field] ?? []).includes(value));
+
+  if (sourceFacets.length === 0 && yearFacets.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={styles.facetsTop}>
+      {sourceFacets.length > 0 && (
+        <div className={styles.facetGroup}>
+          <span className={styles.facetLabel}>Source</span>
+          <div className={styles.facetChips}>
+            {sourceFacets.map(({ value }) => (
+              <button
+                key={value}
+                type="button"
+                className={`${styles.facetButton} ${isFacetSelected('source', value) ? styles.facetButtonSelected : ''}`}
+                onClick={() => onFacetClick?.('source', value)}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {yearFacets.length > 0 && (
+        <div className={styles.facetGroup}>
+          <span className={styles.facetLabel}>Year</span>
+          <div className={styles.facetChips}>
+            {yearFacets.map(({ value }) => (
+              <button
+                key={value}
+                type="button"
+                className={`${styles.facetButton} ${isFacetSelected(YEAR_FACET_FIELD, value) ? styles.facetButtonSelected : ''}`}
+                onClick={() => onFacetClick?.(YEAR_FACET_FIELD, value)}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 /**
@@ -35,6 +104,7 @@ const SearchResults = ({
   onResultClick,
   onPageChange,
   onFacetClick,
+  savedSearchLastSearchedAt,
 }) => {
   // Loading state
   if (isLoading) {
@@ -65,27 +135,8 @@ const SearchResults = ({
     );
   }
 
-  // No results state
-  if (!searchResponse || searchResponse.results?.length === 0) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.emptyState}>
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            <line x1="8" y1="11" x2="14" y2="11" />
-          </svg>
-          <h3>No results found</h3>
-          <p>
-            {searchResponse?.sanitizedQuery 
-              ? `No results for "${searchResponse.sanitizedQuery}"`
-              : 'Try adjusting your search terms or filters'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
+  // No results and no facets
+  const responseData = searchResponse ?? {};
   const {
     results = [],
     totalResults: rawTotal = 0,
@@ -97,12 +148,48 @@ const SearchResults = ({
     searchTimeMs = 0,
     sanitizedQuery = '',
     facetCounts = {},
-  } = searchResponse;
+  } = responseData;
+
+  const { source: sourceFacetsRaw, [YEAR_FACET_FIELD]: yearFacetsRaw } = parseFacetCounts(facetCounts);
+  const selectedSource = selectedFilters.source ?? [];
+  const selectedYear = selectedFilters[YEAR_FACET_FIELD] ?? selectedFilters.year ?? [];
+  const sourceFacets = mergeFacetOptions(sourceFacetsRaw, selectedSource);
+  const yearFacets = mergeFacetOptions(yearFacetsRaw, selectedYear);
+  const hasFacets = sourceFacets.length > 0 || yearFacets.length > 0;
+  const hasResults = results.length > 0;
+  const totalResults = Number(rawTotal) || 0;
+
+  if (!searchResponse || (!hasResults && !hasFacets && totalResults === 0)) {
+    return (
+      <div className={styles.container}>
+        {hasFacets && (
+          <FacetsBar
+            sourceFacets={sourceFacets}
+            yearFacets={yearFacets}
+            selectedFilters={selectedFilters}
+            onFacetClick={onFacetClick}
+          />
+        )}
+        <div className={styles.emptyState}>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+          <h3>No results found</h3>
+          <p>
+            {sanitizedQuery
+              ? `No results for "${sanitizedQuery}"`
+              : 'Try adjusting your search terms or filters'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const aiSummary =
     searchResponse.aiSummary ?? searchResponse.AiSummary ?? undefined;
 
-  const totalResults = Number(rawTotal) || 0;
   const pageNumber = Math.max(1, Number(rawPageNum) || 1);
   const pageSize = Math.max(1, Number(rawPageSize) || 10);
   const totalPagesFromApi = Number(rawTotalPages);
@@ -118,55 +205,19 @@ const SearchResults = ({
       ? rawHasNext
       : totalPages > 0 && pageNumber < totalPages;
 
-  const { source: sourceFacets, year: yearFacets } = parseFacetCounts(facetCounts);
-  const selectedSource = selectedFilters.source ?? [];
-  const selectedYear = selectedFilters.year ?? [];
-
   const isFacetSelected = (field, value) =>
     (selectedFilters[field] ?? []).includes(value);
 
   return (
     <div className={styles.container}>
-      {/* Facets at the top: Source and Year */}
-      {(sourceFacets.length > 0 || yearFacets.length > 0) && (
-        <div className={styles.facetsTop}>
-          {sourceFacets.length > 0 && (
-            <div className={styles.facetGroup}>
-              <span className={styles.facetLabel}>Source</span>
-              <div className={styles.facetChips}>
-                {sourceFacets.map(({ value, count }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`${styles.facetButton} ${isFacetSelected('source', value) ? styles.facetButtonSelected : ''}`}
-                    onClick={() => onFacetClick?.('source', value)}
-                  >
-                    {value}
-                    <span className={styles.facetCount}>{count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {yearFacets.length > 0 && (
-            <div className={styles.facetGroup}>
-              <span className={styles.facetLabel}>Year</span>
-              <div className={styles.facetChips}>
-                {yearFacets.map(({ value, count }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`${styles.facetButton} ${isFacetSelected('year', value) ? styles.facetButtonSelected : ''}`}
-                    onClick={() => onFacetClick?.('year', value)}
-                  >
-                    {value}
-                    <span className={styles.facetCount}>{count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+      {hasFacets && (
+        <FacetsBar
+          sourceFacets={sourceFacets}
+          yearFacets={yearFacets}
+          selectedFilters={selectedFilters}
+          onFacetClick={onFacetClick}
+          isFacetSelected={isFacetSelected}
+        />
       )}
 
       {/* Google-style featured answer (only when API returns aiSummary) */}
@@ -200,6 +251,7 @@ const SearchResults = ({
             key={result.id || index}
             result={result}
             onClick={onResultClick}
+            savedSearchLastSearchedAt={savedSearchLastSearchedAt}
           />
         ))}
       </div>

@@ -1,4 +1,5 @@
 import { get, post, del } from './apiClient';
+import { mockAdcSearch } from './adcSearchMock';
 
 /**
  * Search API endpoints (POST /api/Search)
@@ -14,6 +15,9 @@ export const searchApi = {
   search: (searchRequest) => {
     return post(SEARCH_ENDPOINT, searchRequest, { showLoader: true });
   },
+
+  /** Mock ADC catalog search until backend endpoint is available. */
+  adcSearch: (searchRequest) => mockAdcSearch(searchRequest),
 
   quickSearch: (query, page = 1, pageSize = 10) => {
     const params = new URLSearchParams({

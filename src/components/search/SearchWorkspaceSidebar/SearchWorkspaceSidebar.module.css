@@ -1,0 +1,219 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  min-width: 260px;
+  height: 100%;
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--spacing-lg) var(--spacing-md);
+  background: linear-gradient(180deg, #0f766e 0%, #115e59 100%);
+  color: #ecfdf5;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-sm);
+}
+
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.brandTitle {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  line-height: 1.2;
+}
+
+.brandSub {
+  font-size: var(--font-size-xs);
+  opacity: 0.85;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.navItemActive {
+  background: rgba(255, 255, 255, 0.16);
+  font-weight: var(--font-weight-semibold);
+}
+
+.navIcon {
+  width: 20px;
+  opacity: 0.9;
+}
+
+.badge {
+  margin-left: auto;
+  min-width: 22px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.section {
+  margin-bottom: var(--spacing-md);
+}
+
+.sectionGrow {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin-bottom: var(--spacing-md);
+}
+
+.sectionHeader {
+  margin-bottom: var(--spacing-xs);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+}
+
+.emptyHint {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.queryList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.queryBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.queryBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.queryText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queryAction {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.savedRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.savedRow .queryBtn {
+  flex: 1;
+  min-width: 0;
+}
+
+.deleteBtn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.15);
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.deleteBtn:hover {
+  background: rgba(220, 38, 38, 0.35);
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: 10px;
+  margin-top: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.12);
+  color: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 960px) {
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sectionGrow {
+    max-height: 160px;
+  }
+}

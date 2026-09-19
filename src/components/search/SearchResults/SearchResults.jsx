@@ -105,6 +105,7 @@ const SearchResults = ({
   onPageChange,
   onFacetClick,
   savedSearchLastSearchedAt,
+  showYearFacets = true,
 }) => {
   // Loading state
   if (isLoading) {
@@ -154,7 +155,7 @@ const SearchResults = ({
   const selectedSource = selectedFilters.source ?? [];
   const selectedYear = selectedFilters[YEAR_FACET_FIELD] ?? selectedFilters.year ?? [];
   const sourceFacets = mergeFacetOptions(sourceFacetsRaw, selectedSource);
-  const yearFacets = mergeFacetOptions(yearFacetsRaw, selectedYear);
+  const yearFacets = showYearFacets ? mergeFacetOptions(yearFacetsRaw, selectedYear) : [];
   const hasFacets = sourceFacets.length > 0 || yearFacets.length > 0;
   const hasResults = results.length > 0;
   const totalResults = Number(rawTotal) || 0;

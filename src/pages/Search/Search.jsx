@@ -1,10 +1,19 @@
 import { useState, useCallback, useEffect } from 'react';
-import { SearchResults } from '../../components/search';
 import ConfirmModal from '../../components/common/ConfirmModal';
+import SearchWorkspaceSidebar from '../../components/search/SearchWorkspaceSidebar';
+import AdcSearchResults from '../../components/search/AdcSearchResults';
+import ResearchPaperSearchPanel from '../../components/search/ResearchPaperSearchPanel';
 import { searchApi } from '../../api/searchApi';
 import { loadRecentSearches, saveRecentSearch } from '../../utils/recentSearchStorage';
 import { PREFERRED_SEARCHES_UPDATED } from '../../utils/preferredSearchEvents';
 import styles from './Search.module.css';
+
+const TAB = {
+  ADC: 'adc',
+  RESEARCH: 'research',
+};
+
+const ADC_ALL_SOURCES = 'All';
 
 const mapPreferredTerms = (response) => {
   const data = response?.data ?? response;
@@ -12,24 +21,30 @@ const mapPreferredTerms = (response) => {
   return Array.isArray(terms) ? terms : [];
 };
 
-/**
- * Research search — hybrid AI search over indexed medical literature.
- */
 const Search = () => {
+  const [activeTab, setActiveTab] = useState(TAB.ADC);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResponse, setSearchResponse] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [currentFilters, setCurrentFilters] = useState({});
+
+  const [adcResponse, setAdcResponse] = useState(null);
+  const [adcLoading, setAdcLoading] = useState(false);
+  const [adcError, setAdcError] = useState(null);
+  const [adcHasSearched, setAdcHasSearched] = useState(false);
+  const [adcSourceFilter, setAdcSourceFilter] = useState(ADC_ALL_SOURCES);
+
+  const [researchResponse, setResearchResponse] = useState(null);
+  const [researchLoading, setResearchLoading] = useState(false);
+  const [researchError, setResearchError] = useState(null);
+  const [researchHasSearched, setResearchHasSearched] = useState(false);
+  const [researchFilters, setResearchFilters] = useState({});
   const [peakRelevanceScore, setPeakRelevanceScore] = useState(null);
+  const [savedSearchLastSearchedAt, setSavedSearchLastSearchedAt] = useState(null);
+
   const [recentQueries, setRecentQueries] = useState([]);
   const [savedSearches, setSavedSearches] = useState([]);
   const [isSavingSearch, setIsSavingSearch] = useState(false);
   const [saveMessage, setSaveMessage] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeletingSaved, setIsDeletingSaved] = useState(false);
-  const [savedSearchLastSearchedAt, setSavedSearchLastSearchedAt] = useState(null);
 
   const loadSavedSearches = useCallback(async () => {
     try {
@@ -54,15 +69,53 @@ const Search = () => {
     };
   }, [loadSavedSearches]);
 
-  const performSearch = useCallback(async (query, page = 1, filters = {}) => {
+  const runAdcSearch = useCallback(async (query, page = 1, sourceFilter = adcSourceFilter) => {
     if (!query.trim()) {
-      setError('Please enter a research topic or question');
+      setAdcError('Please enter a search term');
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-    setHasSearched(true);
+    setAdcLoading(true);
+    setAdcError(null);
+    setAdcHasSearched(true);
+    setSaveMessage(null);
+
+    try {
+      const filters =
+        sourceFilter && sourceFilter !== ADC_ALL_SOURCES
+          ? { sourceType: [sourceFilter] }
+          : {};
+
+      const data = await searchApi.adcSearch({
+        searchQuery: query.trim(),
+        pageNumber: page,
+        pageSize: 10,
+        filters: Object.keys(filters).length ? filters : undefined,
+      });
+
+      if (page === 1) {
+        setRecentQueries(saveRecentSearch(query.trim()));
+      }
+
+      setAdcResponse(data);
+    } catch (err) {
+      console.error('ADC search error:', err);
+      setAdcError(err.message || 'ADC search failed.');
+      setAdcResponse(null);
+    } finally {
+      setAdcLoading(false);
+    }
+  }, [adcSourceFilter]);
+
+  const runResearchSearch = useCallback(async (query, page = 1, filters = researchFilters) => {
+    if (!query.trim()) {
+      setResearchError('Please enter a research topic or question');
+      return;
+    }
+
+    setResearchLoading(true);
+    setResearchError(null);
+    setResearchHasSearched(true);
     setSaveMessage(null);
 
     try {
@@ -85,80 +138,102 @@ const Search = () => {
         setRecentQueries(saveRecentSearch(query.trim()));
       }
 
-      setSearchResponse(data);
+      setResearchResponse(data);
     } catch (err) {
       console.error('Search error:', err);
-      setError(err.data?.message || err.message || 'Search failed. Please try again.');
-      setSearchResponse(null);
+      setResearchError(err.data?.message || err.message || 'Search failed. Please try again.');
+      setResearchResponse(null);
     } finally {
-      setIsLoading(false);
+      setResearchLoading(false);
     }
-  }, [peakRelevanceScore]);
+  }, [peakRelevanceScore, researchFilters]);
 
-  const handleSearch = (e) => {
+  const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setCurrentFilters({});
     setPeakRelevanceScore(null);
     setSavedSearchLastSearchedAt(null);
-    performSearch(searchQuery, 1, {});
+    if (activeTab === TAB.ADC) {
+      setAdcSourceFilter(ADC_ALL_SOURCES);
+      runAdcSearch(searchQuery, 1, ADC_ALL_SOURCES);
+    } else {
+      setResearchFilters({});
+      runResearchSearch(searchQuery, 1, {});
+    }
   };
 
-  const handlePageChange = (page) => {
-    const p = typeof page === 'number' && !Number.isNaN(page) ? page : Number.parseInt(String(page), 10);
-    performSearch(searchQuery, Number.isFinite(p) && p > 0 ? p : 1, currentFilters);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSaveMessage(null);
+    setSavedSearchLastSearchedAt(null);
+    setPeakRelevanceScore(null);
+    if (activeTab === TAB.ADC) {
+      setAdcResponse(null);
+      setAdcError(null);
+      setAdcHasSearched(false);
+      setAdcSourceFilter(ADC_ALL_SOURCES);
+    } else {
+      setResearchResponse(null);
+      setResearchError(null);
+      setResearchHasSearched(false);
+      setResearchFilters({});
+    }
   };
 
-  const handleFacetClick = (field, value) => {
-    const current = currentFilters[field] ?? [];
+  const handleSidebarQuery = (term) => {
+    setSearchQuery(term);
+    setPeakRelevanceScore(null);
+    setSavedSearchLastSearchedAt(null);
+    if (activeTab === TAB.ADC) {
+      setAdcSourceFilter(ADC_ALL_SOURCES);
+      runAdcSearch(term, 1, ADC_ALL_SOURCES);
+    } else {
+      setResearchFilters({});
+      runResearchSearch(term, 1, {});
+    }
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSaveMessage(null);
+  };
+
+  const handleAdcSourceFilter = (source) => {
+    setAdcSourceFilter(source);
+    if (adcHasSearched && searchQuery.trim()) {
+      runAdcSearch(searchQuery, 1, source);
+    }
+  };
+
+  const handleResearchFacetClick = (field, value) => {
+    const current = researchFilters[field] ?? [];
     const isSelected = current.includes(value);
-    const next = isSelected
-      ? current.filter((v) => v !== value)
-      : [...current, value];
+    const next = isSelected ? current.filter((v) => v !== value) : [...current, value];
     const updated = next.length
-      ? { ...currentFilters, [field]: next }
+      ? { ...researchFilters, [field]: next }
       : (() => {
-          const rest = { ...currentFilters };
+          const rest = { ...researchFilters };
           delete rest[field];
           return rest;
         })();
-    setCurrentFilters(updated);
+    setResearchFilters(updated);
     setPeakRelevanceScore(null);
     setSavedSearchLastSearchedAt(null);
-    performSearch(searchQuery, 1, updated);
+    runResearchSearch(searchQuery, 1, updated);
+  };
+
+  const handleResearchPageChange = (page) => {
+    runResearchSearch(searchQuery, page, researchFilters);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAdcPageChange = (page) => {
+    runAdcSearch(searchQuery, page, adcSourceFilter);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleResultClick = (result) => {
     if (result.url) {
       window.open(result.url, '_blank');
-    }
-  };
-
-  const handleRecentQuery = (term) => {
-    setSearchQuery(term);
-    setCurrentFilters({});
-    setPeakRelevanceScore(null);
-    setSavedSearchLastSearchedAt(null);
-    performSearch(term, 1, {});
-  };
-
-  const handleSavedQuery = async (savedItem) => {
-    const term = savedItem.searchTerm ?? savedItem.SearchTerm;
-    const lastSearchedAt =
-      savedItem.searchTermLastSearchedAt ?? savedItem.SearchTermLastSearchedAt ?? null;
-
-    setSavedSearchLastSearchedAt(lastSearchedAt);
-    setSearchQuery(term);
-    setCurrentFilters({});
-    setPeakRelevanceScore(null);
-
-    performSearch(term, 1, {});
-
-    try {
-      const response = await searchApi.recordPreferredSearch(term);
-      setSavedSearches(mapPreferredTerms(response));
-    } catch (err) {
-      console.error('Failed to record saved search:', err);
     }
   };
 
@@ -181,17 +256,6 @@ const Search = () => {
     }
   };
 
-  const handleClearSearch = () => {
-    setSearchQuery('');
-    setSearchResponse(null);
-    setHasSearched(false);
-    setError(null);
-    setCurrentFilters({});
-    setPeakRelevanceScore(null);
-    setSaveMessage(null);
-    setSavedSearchLastSearchedAt(null);
-  };
-
   const handleDeleteSavedSearch = async () => {
     if (!deleteTarget) return;
 
@@ -211,143 +275,116 @@ const Search = () => {
     (item) => item.searchTerm?.toLowerCase() === searchQuery.trim().toLowerCase()
   );
 
+  const isLoading = activeTab === TAB.ADC ? adcLoading : researchLoading;
+
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <form className={styles.searchForm} onSubmit={handleSearch}>
-          <div className={styles.searchWrapper}>
-            <svg
-              className={styles.searchIcon}
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden
+    <div className={styles.workspace}>
+      <SearchWorkspaceSidebar
+        recentQueries={recentQueries}
+        savedSearches={savedSearches}
+        onRunQuery={handleSidebarQuery}
+        onDeleteSaved={setDeleteTarget}
+      />
+
+      <div className={styles.main}>
+        <div className={styles.mainInner}>
+          <div className={styles.tabs} role="tablist" aria-label="Search mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === TAB.ADC}
+              className={`${styles.tab} ${activeTab === TAB.ADC ? styles.tabActive : ''}`}
+              onClick={() => handleTabChange(TAB.ADC)}
             >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={styles.searchInput}
-              placeholder="e.g. metformin cardiovascular outcomes, CAR-T therapy..."
-              aria-label="Research search query"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                className={styles.clearBtn}
-                onClick={handleClearSearch}
-                aria-label="Clear search"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            )}
-            <button type="submit" className={styles.searchBtn} disabled={isLoading}>
-              {isLoading ? (
-                <span className={styles.btnSpinner} />
-              ) : (
-                'Search'
-              )}
+              <span className={styles.tabTitle}>ADC search</span>
+              <span className={styles.tabSub}>ADCs, antibodies, payloads, linkers</span>
             </button>
             <button
               type="button"
-              className={styles.saveBtn}
-              onClick={handleSaveSearch}
-              disabled={!searchQuery.trim() || isSavingSearch || isCurrentQuerySaved}
-              title={isCurrentQuerySaved ? 'Already saved' : 'Save this search'}
+              role="tab"
+              aria-selected={activeTab === TAB.RESEARCH}
+              className={`${styles.tab} ${activeTab === TAB.RESEARCH ? styles.tabActive : ''}`}
+              onClick={() => handleTabChange(TAB.RESEARCH)}
             >
-              {isSavingSearch ? 'Saving...' : isCurrentQuerySaved ? 'Saved' : 'Save search'}
+              <span className={styles.tabTitle}>Research papers</span>
+              <span className={styles.tabSub}>Publications &amp; indexed literature</span>
             </button>
           </div>
-          {saveMessage && <p className={styles.saveMessage}>{saveMessage}</p>}
-        </form>
 
-        {!hasSearched && (recentQueries.length > 0 || savedSearches.length > 0) && (
-          <div className={styles.queryShortcuts}>
-            {savedSearches.length > 0 && (
-              <div className={styles.recentSearches}>
-                <span className={styles.recentLabel}>Saved:</span>
-                <div className={styles.recentTags}>
-                  {savedSearches.map((item) => (
-                    <div key={item.searchTerm} className={styles.savedTagItem}>
-                      <button
-                        type="button"
-                        className={`${styles.recentTag} ${styles.savedTag}`}
-                        onClick={() => handleSavedQuery(item)}
-                      >
-                        {item.searchTerm}
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.savedTagDelete}
-                        onClick={() => setDeleteTarget(item.searchTerm)}
-                        aria-label={`Delete saved search ${item.searchTerm}`}
-                        title="Delete saved search"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
+            <div className={styles.searchWrapper}>
+              <svg className={styles.searchIcon} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={styles.searchInput}
+                placeholder={
+                  activeTab === TAB.ADC
+                    ? 'e.g. BL-B01D1, trastuzumab deruxtecan, MMAE payload…'
+                    : 'e.g. metformin cardiovascular outcomes, CAR-T therapy…'
+                }
+                aria-label="Search query"
+              />
+              {searchQuery && (
+                <button type="button" className={styles.clearBtn} onClick={handleClearSearch} aria-label="Clear search">
+                  ×
+                </button>
+              )}
+              <button type="submit" className={styles.searchBtn} disabled={isLoading}>
+                {isLoading ? <span className={styles.btnSpinner} /> : 'Search'}
+              </button>
+              <button
+                type="button"
+                className={styles.saveBtn}
+                onClick={handleSaveSearch}
+                disabled={!searchQuery.trim() || isSavingSearch || isCurrentQuerySaved}
+              >
+                {isSavingSearch ? 'Saving…' : isCurrentQuerySaved ? 'Saved' : 'Save search'}
+              </button>
+            </div>
+            {saveMessage && <p className={styles.saveMessage}>{saveMessage}</p>}
+          </form>
 
-            {recentQueries.length > 0 && (
-              <div className={styles.recentSearches}>
-                <span className={styles.recentLabel}>Recent:</span>
-                <div className={styles.recentTags}>
-                  {recentQueries.map((term) => (
-                    <button
-                      key={term}
-                      type="button"
-                      className={styles.recentTag}
-                      onClick={() => handleRecentQuery(term)}
-                    >
-                      {term}
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <div className={styles.resultsPanel}>
+            {activeTab === TAB.ADC ? (
+              <AdcSearchResults
+                searchResponse={adcHasSearched ? adcResponse : null}
+                isLoading={adcLoading}
+                error={adcError}
+                selectedSource={adcSourceFilter}
+                onSourceFilter={handleAdcSourceFilter}
+                onPageChange={handleAdcPageChange}
+              />
+            ) : (
+              <ResearchPaperSearchPanel
+                hasSearched={researchHasSearched}
+                searchResponse={researchResponse}
+                isLoading={researchLoading}
+                error={researchError}
+                selectedFilters={researchFilters}
+                onResultClick={handleResultClick}
+                onPageChange={handleResearchPageChange}
+                onFacetClick={handleResearchFacetClick}
+                savedSearchLastSearchedAt={savedSearchLastSearchedAt}
+              />
             )}
           </div>
-        )}
-
-        {hasSearched && (
-          <div className={styles.resultsSection}>
-            <SearchResults
-              searchResponse={searchResponse}
-              isLoading={isLoading}
-              error={error}
-              selectedFilters={currentFilters}
-              onResultClick={handleResultClick}
-              onPageChange={handlePageChange}
-              onFacetClick={handleFacetClick}
-              savedSearchLastSearchedAt={savedSearchLastSearchedAt}
-            />
-          </div>
-        )}
-
-        <ConfirmModal
-          isOpen={Boolean(deleteTarget)}
-          onClose={() => !isDeletingSaved && setDeleteTarget(null)}
-          onConfirm={handleDeleteSavedSearch}
-          title="Delete saved search"
-          message={deleteTarget ? `Remove "${deleteTarget}" from your saved searches?` : ''}
-          confirmLabel="Delete"
-          isLoading={isDeletingSaved}
-        />
+        </div>
       </div>
+
+      <ConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !isDeletingSaved && setDeleteTarget(null)}
+        onConfirm={handleDeleteSavedSearch}
+        title="Delete saved search"
+        message={deleteTarget ? `Remove "${deleteTarget}" from your saved searches?` : ''}
+        confirmLabel="Delete"
+        isLoading={isDeletingSaved}
+      />
     </div>
   );
 };

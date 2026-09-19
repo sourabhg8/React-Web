@@ -91,7 +91,7 @@ const Header = () => {
 
           {isAuthenticated && (user?.role === ROLES.ORG_USER || user?.role === "org_user") && (
             <Link to={ROUTES.SEARCH} className={styles.navLink}>
-              Research Paper Search
+              Search
             </Link>
           )}
 

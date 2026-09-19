@@ -38,6 +38,7 @@
   height: 45px;
   width: auto;
   object-fit: contain;
+  display: block;
 }
 
 /* Navigation */
@@ -78,6 +79,14 @@
 
 .navLink:hover::after {
   width: 60%;
+}
+
+/* Right cluster: mobile menu + login / profile */
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: auto;
 }
 
 /* Actions Container */
@@ -249,11 +258,11 @@
 }
 
 .dropdownLogout:hover {
-  background: rgba(220, 38, 38, 0.08);
+  background: var(--color-error-light);
   color: var(--color-error);
 }
 
-/* Mobile Menu Button */
+/* Mobile Menu Button (search workspace sidebar on /search) */
 .mobileMenuBtn {
   display: none;
   flex-direction: column;
@@ -263,8 +272,10 @@
   height: 36px;
   padding: 8px;
   background: transparent;
-  border: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .mobileMenuBtn span {
@@ -276,18 +287,39 @@
   transition: all var(--transition-fast);
 }
 
+.mobileMenuBtnOpen span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.mobileMenuBtnOpen span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobileMenuBtnOpen span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 /* Responsive Styles */
+@media (max-width: 960px) {
+  .mobileMenuBtn {
+    display: flex;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 0 var(--spacing-md);
+    justify-content: flex-start;
+    gap: var(--spacing-md);
   }
 
   .nav {
     display: none;
   }
 
-  .mobileMenuBtn {
-    display: flex;
+  .headerRight {
+    margin-left: auto;
+    flex-shrink: 0;
   }
 
   .loginBtn span {

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import SearchResultItem from '../SearchResultItem';
 import styles from './SearchResults.module.css';
 
@@ -52,40 +53,75 @@ function FacetsBar({
     return null;
   }
 
+  const hasSource = sourceFacets.length > 0;
+  const hasYear = yearFacets.length > 0;
+
   return (
-    <div className={styles.facetsTop}>
-      {sourceFacets.length > 0 && (
-        <div className={styles.facetGroup}>
-          <span className={styles.facetLabel}>Source</span>
-          <div className={styles.facetChips}>
-            {sourceFacets.map(({ value }) => (
-              <button
-                key={value}
-                type="button"
-                className={`${styles.facetButton} ${isFacetSelected('source', value) ? styles.facetButtonSelected : ''}`}
-                onClick={() => onFacetClick?.('source', value)}
-              >
-                {value}
-              </button>
-            ))}
+    <div className={styles.facetsCompact}>
+      <div className={styles.facetsSingleRow}>
+        {hasSource && (
+          <div className={styles.facetSegment}>
+            <span className={styles.facetLabel}>Source</span>
+            <div className={styles.facetChipsInline}>
+              {sourceFacets.map(({ value }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`${styles.facetButton} ${isFacetSelected('source', value) ? styles.facetButtonSelected : ''}`}
+                  onClick={() => onFacetClick?.('source', value)}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-      {yearFacets.length > 0 && (
-        <div className={styles.facetGroup}>
-          <span className={styles.facetLabel}>Year</span>
-          <div className={styles.facetChips}>
-            {yearFacets.map(({ value }) => (
-              <button
-                key={value}
-                type="button"
-                className={`${styles.facetButton} ${isFacetSelected(YEAR_FACET_FIELD, value) ? styles.facetButtonSelected : ''}`}
-                onClick={() => onFacetClick?.(YEAR_FACET_FIELD, value)}
-              >
-                {value}
-              </button>
-            ))}
+        )}
+        {hasSource && hasYear && <span className={styles.facetDivider} aria-hidden />}
+        {hasYear && (
+          <div className={styles.facetSegment}>
+            <span className={styles.facetLabel}>Year</span>
+            <div className={styles.facetChipsInline}>
+              {yearFacets.map(({ value }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`${styles.facetButton} ${isFacetSelected(YEAR_FACET_FIELD, value) ? styles.facetButtonSelected : ''}`}
+                  onClick={() => onFacetClick?.(YEAR_FACET_FIELD, value)}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
           </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AiSummaryPanel({ summary }) {
+  const [expanded, setExpanded] = useState(false);
+  const text = summary.trim();
+
+  return (
+    <div className={styles.aiSummaryPanel} role="region" aria-label="AI summary">
+      <button
+        type="button"
+        className={styles.aiSummaryToggle}
+        onClick={() => setExpanded((open) => !open)}
+        aria-expanded={expanded}
+      >
+        <span className={styles.aiSummaryBadge}>AI</span>
+        <span className={styles.aiSummaryToggleLabel}>
+          {expanded ? 'Hide overview' : 'Show AI overview'}
+        </span>
+        <span className={`${styles.aiSummaryChevron} ${expanded ? styles.aiSummaryChevronOpen : ''}`} aria-hidden>
+          ▾
+        </span>
+      </button>
+      {expanded && (
+        <div className={styles.aiSummaryBody}>
+          <p className={styles.aiSummaryText}>{text}</p>
         </div>
       )}
     </div>
@@ -164,12 +200,14 @@ const SearchResults = ({
     return (
       <div className={styles.container}>
         {hasFacets && (
-          <FacetsBar
-            sourceFacets={sourceFacets}
-            yearFacets={yearFacets}
-            selectedFilters={selectedFilters}
-            onFacetClick={onFacetClick}
-          />
+          <div className={styles.resultsToolbar}>
+            <FacetsBar
+              sourceFacets={sourceFacets}
+              yearFacets={yearFacets}
+              selectedFilters={selectedFilters}
+              onFacetClick={onFacetClick}
+            />
+          </div>
         )}
         <div className={styles.emptyState}>
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -209,29 +247,12 @@ const SearchResults = ({
   const isFacetSelected = (field, value) =>
     (selectedFilters[field] ?? []).includes(value);
 
+  const showAiSummary = typeof aiSummary === 'string' && aiSummary.trim().length > 0;
+
   return (
     <div className={styles.container}>
-      {hasFacets && (
-        <FacetsBar
-          sourceFacets={sourceFacets}
-          yearFacets={yearFacets}
-          selectedFilters={selectedFilters}
-          onFacetClick={onFacetClick}
-          isFacetSelected={isFacetSelected}
-        />
-      )}
-
-      {/* Google-style featured answer (only when API returns aiSummary) */}
-      {typeof aiSummary === 'string' && aiSummary.trim().length > 0 && (
-        <div className={styles.featuredAnswer} role="region" aria-label="AI summary">
-          <div className={styles.featuredAnswerLabel}>AI overview</div>
-          <p className={styles.featuredAnswerText}>{aiSummary.trim()}</p>
-        </div>
-      )}
-
-      {/* Results Header */}
-      <div className={styles.header}>
-        <div className={styles.resultInfo}>
+      <div className={styles.resultsToolbar}>
+        <div className={styles.toolbarMeta}>
           <h2 className={styles.resultCount}>
             <span className={styles.countNumber}>{totalResults}</span>
             {totalResults === 1 ? ' result' : ' results'}
@@ -239,11 +260,20 @@ const SearchResults = ({
               <span className={styles.queryText}> for &quot;{sanitizedQuery}&quot;</span>
             )}
           </h2>
-          <span className={styles.searchTime}>
-            ({searchTimeMs}ms)
-          </span>
+          <span className={styles.searchTime}>{searchTimeMs}ms</span>
         </div>
+        {hasFacets && (
+          <FacetsBar
+            sourceFacets={sourceFacets}
+            yearFacets={yearFacets}
+            selectedFilters={selectedFilters}
+            onFacetClick={onFacetClick}
+            isFacetSelected={isFacetSelected}
+          />
+        )}
       </div>
+
+      {showAiSummary && <AiSummaryPanel summary={aiSummary} />}
 
       {/* Results List */}
       <div className={styles.resultsList}>

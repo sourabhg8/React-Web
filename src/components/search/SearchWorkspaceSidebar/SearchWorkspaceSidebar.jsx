@@ -58,51 +58,55 @@ const SearchWorkspaceSidebar = ({
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Recent</h2>
         </div>
-        {recentQueries.length === 0 ? (
-          <p className={styles.emptyHint}>Recent searches appear here.</p>
-        ) : (
-          <ul className={styles.queryList}>
-            {recentQueries.map((term) => (
-              <li key={term}>
-                <button type="button" className={styles.queryBtn} onClick={() => onRunQuery?.(term)}>
-                  <span className={styles.queryText}>{term}</span>
-                  <span className={styles.queryAction} aria-hidden>↗</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className={styles.sectionScroll}>
+          {recentQueries.length === 0 ? (
+            <p className={styles.emptyHint}>Recent searches appear here.</p>
+          ) : (
+            <ul className={styles.queryList}>
+              {recentQueries.map((term) => (
+                <li key={term}>
+                  <button type="button" className={styles.queryBtn} onClick={() => onRunQuery?.(term)}>
+                    <span className={styles.queryText}>{term}</span>
+                    <span className={styles.queryAction} aria-hidden>↗</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <div className={styles.sectionGrow}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Saved searches</h2>
         </div>
-        {savedSearches.length === 0 ? (
-          <p className={styles.emptyHint}>Save a search from the bar above.</p>
-        ) : (
-          <ul className={styles.queryList}>
-            {savedSearches.map((item) => {
-              const term = item.searchTerm ?? item.SearchTerm;
-              return (
-                <li key={term} className={styles.savedRow}>
-                  <button type="button" className={styles.queryBtn} onClick={() => onRunQuery?.(term)}>
-                    <span className={styles.queryText}>{term}</span>
-                    <span className={styles.queryAction} aria-hidden>↗</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.deleteBtn}
-                    onClick={() => onDeleteSaved?.(term)}
-                    aria-label={`Delete saved search ${term}`}
-                  >
-                    ×
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <div className={`${styles.sectionScroll} ${styles.sectionScrollGrow}`}>
+          {savedSearches.length === 0 ? (
+            <p className={styles.emptyHint}>Save a search from the bar above.</p>
+          ) : (
+            <ul className={styles.queryList}>
+              {savedSearches.map((item) => {
+                const term = item.searchTerm ?? item.SearchTerm;
+                return (
+                  <li key={term} className={styles.savedRow}>
+                    <button type="button" className={styles.queryBtn} onClick={() => onRunQuery?.(term)}>
+                      <span className={styles.queryText}>{term}</span>
+                      <span className={styles.queryAction} aria-hidden>↗</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.deleteBtn}
+                      onClick={() => onDeleteSaved?.(term)}
+                      aria-label={`Delete saved search ${term}`}
+                    >
+                      ×
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </div>
 
       <button type="button" className={styles.logoutBtn} onClick={handleLogout}>

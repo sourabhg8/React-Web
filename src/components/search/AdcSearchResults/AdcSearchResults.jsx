@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { formatRelevancePercent } from '../../../utils/formatRelevance';
 import { AdcSourceIcon, getAdcSourceMeta } from './adcSourceIcons';
 import styles from './AdcSearchResults.module.css';
 
@@ -147,7 +148,9 @@ const AdcSearchResults = ({
                   </span>
                 </span>
                 <span className={styles.relevance}>
-                  <span className={styles.relevanceValue}>{result.relevanceScore}%</span>
+                  <span className={styles.relevanceValue}>
+                    {formatRelevancePercent(result.relevanceScore)}%
+                  </span>
                   <span className={styles.relevanceBar} aria-hidden>
                     <span
                       className={styles.relevanceFill}

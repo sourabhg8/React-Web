@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   selectIsAuthenticated,
   selectUser,
   logout,
 } from "../../../store/slices/authSlice";
-import { openLoginModal } from "../../../store/slices/uiSlice";
+import {
+  openLoginModal,
+  toggleSearchSidebar,
+  selectSearchSidebarOpen,
+} from "../../../store/slices/uiSlice";
 import { ROLES, ROUTES } from "../../../utils/constants";
 import { searchApi } from "../../../api/searchApi";
 import { notifyPreferredSearchesUpdated } from "../../../utils/preferredSearchEvents";
@@ -17,8 +21,11 @@ import styles from "./Header.module.css";
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
+  const searchSidebarOpen = useSelector(selectSearchSidebarOpen);
+  const isSearchPage = location.pathname === ROUTES.SEARCH;
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showDeleteAllSaved, setShowDeleteAllSaved] = useState(false);
   const [isDeletingAllSaved, setIsDeletingAllSaved] = useState(false);
@@ -102,7 +109,22 @@ const Header = () => {
           )}
         </nav>
 
-        <div className={styles.actions}>
+        <div className={styles.headerRight}>
+          {isSearchPage && (
+            <button
+              type="button"
+              className={`${styles.mobileMenuBtn} ${searchSidebarOpen ? styles.mobileMenuBtnOpen : ""}`}
+              aria-label={searchSidebarOpen ? "Close search menu" : "Open search menu"}
+              aria-expanded={searchSidebarOpen}
+              onClick={() => dispatch(toggleSearchSidebar())}
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          )}
+
+          <div className={styles.actions}>
           {isAuthenticated ? (
             <div className={styles.userMenuWrapper}>
               <button className={styles.userIconBtn} aria-label="User menu">
@@ -209,14 +231,8 @@ const Header = () => {
               </svg>
             </button>
           )}
+          </div>
         </div>
-
-        {/* Mobile Menu Button */}
-        <button className={styles.mobileMenuBtn} aria-label="Toggle menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
       </div>
 
       {/* Change Password Modal */}

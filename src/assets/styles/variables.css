@@ -1,46 +1,96 @@
 :root {
-  /* Color Palette - Clean Light Theme with Professional Accents */
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
-  --color-primary-light: rgba(79, 70, 229, 0.1);
+  /*
+   * Tehri Hills — logo: emerald green (TEHRI) → royal blue (HILLS).
+   * UI keeps the same hue angle at lower saturation for a calm, elegant surface.
+   */
+  --color-brand-green: #45b883;
+  --color-brand-blue: #4a78ad;
+  /* Logo mark sits on deep navy (reads bluish, not pure black) */
+  --color-brand-night: #141f33;
+  --color-brand-night-deep: #0f1829;
 
-  --color-secondary: #7c3aed;
-  --color-secondary-hover: #6d28d9;
+  --color-primary: var(--color-brand-green);
+  --color-primary-hover: #3a9d72;
+  --color-primary-light: rgba(69, 184, 131, 0.12);
+  --color-primary-soft: rgba(69, 184, 131, 0.07);
 
-  --color-accent: #0891b2;
-  --color-accent-hover: #0e7490;
+  --color-secondary: var(--color-brand-blue);
+  --color-secondary-hover: #3d6694;
+  --color-secondary-light: rgba(74, 120, 173, 0.12);
 
-  /* Background Colors - Light Theme */
+  --color-accent: var(--color-secondary);
+  --color-accent-hover: var(--color-secondary-hover);
+
+  /* Background Colors */
   --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
+  --bg-secondary: #f4f8f6;
+  --bg-tertiary: #eaf1ef;
   --bg-card: #ffffff;
-  --bg-overlay: rgba(15, 23, 42, 0.6);
+  --bg-overlay: rgba(15, 23, 42, 0.5);
   --bg-modal: #ffffff;
 
   /* Text Colors */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-primary: #1a2433;
+  --text-secondary: #52606d;
+  --text-muted: #94a3b1;
   --text-inverse: #ffffff;
 
   /* Border Colors */
-  --border-color: #e2e8f0;
-  --border-hover: #cbd5e1;
+  --border-color: #e2e8ec;
+  --border-hover: #cbd5dc;
   --border-focus: var(--color-primary);
 
-  /* Status Colors */
-  --color-success: #059669;
-  --color-error: #dc2626;
-  --color-warning: #d97706;
-  --color-info: #2563eb;
+  /* Status Colors — muted */
+  --color-success: #5f9a7a;
+  --color-success-light: rgba(95, 154, 122, 0.12);
+  --color-error: #c07070;
+  --color-error-light: rgba(192, 112, 112, 0.12);
+  --color-warning: #b8945f;
+  --color-warning-light: rgba(184, 148, 95, 0.12);
+  --color-info: var(--color-secondary);
+  --color-info-light: var(--color-secondary-light);
 
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
-  --gradient-secondary: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  --gradient-accent: linear-gradient(90deg, #0891b2, #4f46e5);
-  --gradient-hero: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-  --gradient-subtle: linear-gradient(180deg, rgba(79, 70, 229, 0.03) 0%, transparent 100%);
+  /* Gradients — logo green → blue (loader, buttons, accents share one brand gradient) */
+  --gradient-brand: linear-gradient(135deg, #45b883 0%, #4a78ad 100%);
+  --gradient-primary: var(--gradient-brand);
+  --gradient-secondary: linear-gradient(135deg, #f4f8f6 0%, #eaf1ef 100%);
+  --gradient-accent: linear-gradient(90deg, #45b883, #4a78ad);
+  --gradient-hero: linear-gradient(180deg, #f4f8f6 0%, #ffffff 100%);
+  --gradient-subtle: linear-gradient(
+    180deg,
+    rgba(69, 184, 131, 0.06) 0%,
+    rgba(74, 120, 173, 0.05) 100%
+  );
+  --gradient-sidebar: linear-gradient(180deg, #2d5c52 0%, var(--color-brand-night) 100%);
+
+  --color-sidebar-text: #edf5f3;
+  --color-sidebar-text-muted: rgba(237, 245, 243, 0.82);
+
+  /* Decorative (hero grids, glows) — logo green / blue at low alpha */
+  --alpha-brand-green-04: rgba(69, 184, 131, 0.04);
+  --alpha-brand-blue-04: rgba(74, 120, 173, 0.04);
+  --alpha-brand-green-08: rgba(69, 184, 131, 0.08);
+  --alpha-brand-green-10: rgba(69, 184, 131, 0.1);
+  --alpha-brand-green-20: rgba(69, 184, 131, 0.2);
+  --alpha-brand-blue-08: rgba(74, 120, 173, 0.08);
+  --alpha-brand-green-35: rgba(69, 184, 131, 0.35);
+  --alpha-brand-primary-15: rgba(69, 184, 131, 0.15);
+
+  /* Pastel accents for tags / icons */
+  --pastel-blue-bg: rgba(74, 120, 173, 0.14);
+  --pastel-blue-fg: #46688f;
+  --pastel-violet-bg: rgba(139, 127, 168, 0.14);
+  --pastel-violet-fg: #6f6589;
+  --pastel-green-bg: rgba(95, 154, 122, 0.14);
+  --pastel-green-fg: #4d7a62;
+  --pastel-amber-bg: rgba(184, 148, 95, 0.14);
+  --pastel-amber-fg: #8a7349;
+  --pastel-rose-bg: rgba(186, 130, 150, 0.14);
+  --pastel-rose-fg: #8f6578;
+  --pastel-teal-bg: rgba(69, 184, 131, 0.14);
+  --pastel-teal-fg: #3d7a5a;
+  --pastel-orange-bg: rgba(196, 130, 90, 0.14);
+  --pastel-orange-fg: #8f6044;
 
   /* Typography */
   --font-primary: "Outfit", "Segoe UI", system-ui, sans-serif;
@@ -82,14 +132,14 @@
   --radius-2xl: 1.5rem;
   --radius-full: 9999px;
 
-  /* Shadows - Lighter for light theme */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 20px rgba(79, 70, 229, 0.15);
-  --shadow-glow-lg: 0 0 40px rgba(79, 70, 229, 0.2);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(30, 41, 59, 0.04);
+  --shadow-md: 0 4px 6px rgba(30, 41, 59, 0.06);
+  --shadow-lg: 0 10px 15px rgba(30, 41, 59, 0.07);
+  --shadow-xl: 0 20px 25px rgba(30, 41, 59, 0.08);
+  --shadow-glow: 0 0 20px rgba(69, 184, 131, 0.1);
+  --shadow-glow-lg: 0 0 40px rgba(74, 120, 173, 0.12);
+  --shadow-card: 0 1px 3px rgba(30, 41, 59, 0.05), 0 4px 12px rgba(30, 41, 59, 0.04);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -117,7 +167,6 @@
   --footer-height: 60px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   :root {
     --font-size-5xl: 2.5rem;

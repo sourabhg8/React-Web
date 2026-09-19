@@ -11,11 +11,11 @@ const iconProps = {
 export function getAdcSourceMeta(sourceType) {
   const key = (sourceType || 'Other').toLowerCase();
   const map = {
-    adc: { label: 'ADC', className: 'adc', color: '#0d9488' },
-    antibody: { label: 'Antibody', className: 'antibody', color: '#ea580c' },
-    payload: { label: 'Payload', className: 'payload', color: '#2563eb' },
-    linker: { label: 'Linker', className: 'linker', color: '#dc2626' },
-    other: { label: 'Other', className: 'other', color: '#64748b' },
+    adc: { label: 'ADC', className: 'adc', color: '#45b883' },
+    antibody: { label: 'Antibody', className: 'antibody', color: '#8f6044' },
+    payload: { label: 'Payload', className: 'payload', color: '#5a7294' },
+    linker: { label: 'Linker', className: 'linker', color: '#c07070' },
+    other: { label: 'Other', className: 'other', color: '#7a8794' },
   };
   return map[key] || map.other;
 }

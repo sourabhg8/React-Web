@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 // Layout Components
 import { Header, Footer } from "./components/layout";
@@ -26,8 +27,15 @@ import { ROUTES, ROLES } from "./utils/constants";
 
 function App() {
   const dispatch = useDispatch();
+  const location = useLocation();
   const isLoginModalOpen = useSelector(selectIsLoginModalOpen);
   const globalLoader = useSelector(selectGlobalLoader);
+  const isSearchRoute = location.pathname === ROUTES.SEARCH;
+
+  useEffect(() => {
+    document.body.classList.toggle("search-route", isSearchRoute);
+    return () => document.body.classList.remove("search-route");
+  }, [isSearchRoute]);
 
   const handleCloseLoginModal = () => {
     dispatch(closeLoginModal());
@@ -42,7 +50,7 @@ function App() {
       <Header />
 
       {/* Main Content */}
-      <main className="main-content">
+      <main className={`main-content${isSearchRoute ? " main-content--search" : ""}`}>
         <Routes>
           {/* Public Routes */}
           <Route path={ROUTES.HOME} element={<Home />} />
@@ -82,8 +90,8 @@ function App() {
         </Routes>
       </main>
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer — hidden on search; workspace uses full height below header */}
+      {!isSearchRoute && <Footer />}
 
       {/* Login Modal */}
       <Modal

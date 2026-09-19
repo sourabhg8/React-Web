@@ -3,12 +3,14 @@
   flex-direction: column;
   width: 260px;
   min-width: 260px;
-  height: 100%;
-  min-height: calc(100vh - var(--header-height));
+  flex: 1;
+  min-height: 0;
+  height: auto;
   padding: var(--spacing-lg) var(--spacing-md);
-  background: linear-gradient(180deg, #0f766e 0%, #115e59 100%);
-  color: #ecfdf5;
+  background: var(--gradient-sidebar);
+  color: var(--color-sidebar-text);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
 .brand {
@@ -89,14 +91,52 @@
 }
 
 .section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   margin-bottom: var(--spacing-md);
+  flex-shrink: 0;
 }
 
 .sectionGrow {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow: auto;
   margin-bottom: var(--spacing-md);
+}
+
+.sectionScroll {
+  max-height: 132px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sectionScrollGrow {
+  flex: 1;
+  max-height: none;
+  min-height: 0;
+}
+
+.sectionScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sectionScroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+}
+
+.sectionScroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 3px;
+}
+
+.sectionScroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .sectionHeader {
@@ -180,7 +220,7 @@
 }
 
 .deleteBtn:hover {
-  background: rgba(220, 38, 38, 0.35);
+  background: rgba(192, 112, 112, 0.35);
 }
 
 .logoutBtn {
@@ -208,12 +248,20 @@
   .sidebar {
     width: 100%;
     min-width: 0;
-    min-height: auto;
+    height: 100%;
+    max-height: none;
+    min-height: 0;
     border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
   }
 
-  .sectionGrow {
-    max-height: 160px;
+  .sectionScroll {
+    max-height: 120px;
+  }
+
+  .sectionScrollGrow {
+    max-height: 140px;
+    flex: none;
   }
 }

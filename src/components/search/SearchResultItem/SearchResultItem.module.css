@@ -34,8 +34,8 @@
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #fff;
-  background: linear-gradient(135deg, #0891b2 0%, #4f46e5 100%);
+  color: var(--text-inverse);
+  background: var(--gradient-brand);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
   pointer-events: none;
@@ -59,33 +59,33 @@
 
 /* Type Colors */
 .typeDocument {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: var(--pastel-blue-bg);
+  color: var(--pastel-blue-fg);
 }
 
 .typeArticle {
-  background: rgba(168, 85, 247, 0.1);
-  color: #a855f7;
+  background: var(--pastel-violet-bg);
+  color: var(--pastel-violet-fg);
 }
 
 .typeHelp {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background: var(--pastel-green-bg);
+  color: var(--pastel-green-fg);
 }
 
 .typeFeature {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: var(--pastel-amber-bg);
+  color: var(--pastel-amber-fg);
 }
 
 .typeTutorial {
-  background: rgba(236, 72, 153, 0.1);
-  color: #ec4899;
+  background: var(--pastel-rose-bg);
+  color: var(--pastel-rose-fg);
 }
 
 .typeNews {
-  background: rgba(14, 165, 233, 0.1);
-  color: #0ea5e9;
+  background: var(--pastel-teal-bg);
+  color: var(--pastel-teal-fg);
 }
 
 .typeDefault {
@@ -138,17 +138,42 @@
 }
 
 .typeBadge {
-  background: currentColor;
-  color: white;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
-.typeBadge.typeDocument { background: #3b82f6; }
-.typeBadge.typeArticle { background: #a855f7; }
-.typeBadge.typeHelp { background: #22c55e; }
-.typeBadge.typeFeature { background: #f59e0b; }
-.typeBadge.typeTutorial { background: #ec4899; }
-.typeBadge.typeNews { background: #0ea5e9; }
-.typeBadge.typeDefault { background: var(--text-muted); }
+.typeBadge.typeDocument {
+  background: var(--pastel-blue-bg);
+  color: var(--pastel-blue-fg);
+  border-color: transparent;
+}
+.typeBadge.typeArticle {
+  background: var(--pastel-violet-bg);
+  color: var(--pastel-violet-fg);
+  border-color: transparent;
+}
+.typeBadge.typeHelp {
+  background: var(--pastel-green-bg);
+  color: var(--pastel-green-fg);
+  border-color: transparent;
+}
+.typeBadge.typeFeature {
+  background: var(--pastel-amber-bg);
+  color: var(--pastel-amber-fg);
+  border-color: transparent;
+}
+.typeBadge.typeTutorial {
+  background: var(--pastel-rose-bg);
+  color: var(--pastel-rose-fg);
+  border-color: transparent;
+}
+.typeBadge.typeNews {
+  background: var(--pastel-teal-bg);
+  color: var(--pastel-teal-fg);
+  border-color: transparent;
+}
+.typeBadge.typeDefault { background: var(--bg-tertiary); }
 
 .categoryBadge {
   background: var(--bg-tertiary);

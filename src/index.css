@@ -153,6 +153,38 @@ ol {
 /* Main content wrapper */
 .main-content {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* Search workspace: no document scroll; only results panel scrolls */
+body.search-route {
+  overflow: hidden;
+  height: 100%;
+}
+
+html:has(body.search-route) {
+  height: 100%;
+  overflow: hidden;
+}
+
+body.search-route #root {
+  height: 100vh;
+  max-height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.main-content--search {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content--search > .workspace {
+  flex: 1 1 auto;
+  min-height: 0;
 }

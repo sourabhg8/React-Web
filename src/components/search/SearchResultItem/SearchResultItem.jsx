@@ -3,6 +3,7 @@ import {
   formatPublishDate,
   isResultNewSinceSavedSearch,
 } from '../../../utils/searchResultDates';
+import { formatRelevancePercent } from '../../../utils/formatRelevance';
 import styles from './SearchResultItem.module.css';
 
 /**
@@ -235,7 +236,7 @@ const SearchResultItem = ({ result, onClick, savedSearchLastSearchedAt }) => {
 
           {typeof result.relevanceScore === 'number' && (
             <span className={styles.relevance}>
-              Relevance: {result.relevanceScore}%
+              Relevance: {formatRelevancePercent(result.relevanceScore)}%
             </span>
           )}
         </div>

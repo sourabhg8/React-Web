@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import ConfirmModal from '../../components/common/ConfirmModal';
+import { setSearchSidebarOpen, selectSearchSidebarOpen } from '../../store/slices/uiSlice';
 import SearchWorkspaceSidebar from '../../components/search/SearchWorkspaceSidebar';
 import AdcSearchResults from '../../components/search/AdcSearchResults';
 import ResearchPaperSearchPanel from '../../components/search/ResearchPaperSearchPanel';
@@ -22,6 +24,8 @@ const mapPreferredTerms = (response) => {
 };
 
 const Search = () => {
+  const dispatch = useDispatch();
+  const searchSidebarOpen = useSelector(selectSearchSidebarOpen);
   const [activeTab, setActiveTab] = useState(TAB.ADC);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -54,6 +58,13 @@ const Search = () => {
       console.error('Failed to load saved searches:', err);
     }
   }, []);
+
+  useEffect(() => {
+    dispatch(setSearchSidebarOpen(false));
+    return () => {
+      dispatch(setSearchSidebarOpen(false));
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     setRecentQueries(loadRecentSearches());
@@ -180,6 +191,7 @@ const Search = () => {
   };
 
   const handleSidebarQuery = (term) => {
+    dispatch(setSearchSidebarOpen(false));
     setSearchQuery(term);
     setPeakRelevanceScore(null);
     setSavedSearchLastSearchedAt(null);
@@ -279,12 +291,25 @@ const Search = () => {
 
   return (
     <div className={styles.workspace}>
-      <SearchWorkspaceSidebar
-        recentQueries={recentQueries}
-        savedSearches={savedSearches}
-        onRunQuery={handleSidebarQuery}
-        onDeleteSaved={setDeleteTarget}
-      />
+      {searchSidebarOpen && (
+        <button
+          type="button"
+          className={styles.sidebarBackdrop}
+          aria-label="Close search menu"
+          onClick={() => dispatch(setSearchSidebarOpen(false))}
+        />
+      )}
+
+      <div
+        className={`${styles.sidebarWrap} ${searchSidebarOpen ? styles.sidebarWrapOpen : ''}`}
+      >
+        <SearchWorkspaceSidebar
+          recentQueries={recentQueries}
+          savedSearches={savedSearches}
+          onRunQuery={handleSidebarQuery}
+          onDeleteSaved={setDeleteTarget}
+        />
+      </div>
 
       <div className={styles.main}>
         <div className={styles.mainInner}>

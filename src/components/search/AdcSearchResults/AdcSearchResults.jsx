@@ -5,6 +5,36 @@ import styles from './AdcSearchResults.module.css';
 
 const ALL_SOURCES = 'All';
 
+/** Order and labels for expanded row details (matches API AdcSearchDetailsDto). */
+const ADC_DETAIL_FIELDS = [
+  { key: 'name', label: 'Name', fullWidth: true },
+  { key: 'aliases', label: 'Aliases', fullWidth: true },
+  { key: 'normalizedAliases', label: 'Normalized aliases', fullWidth: true },
+  { key: 'antibody', label: 'Antibody' },
+  { key: 'targets', label: 'Targets', fullWidth: true },
+  { key: 'linkerCode', label: 'Linker code' },
+  { key: 'linkerType', label: 'Linker type' },
+  { key: 'linkerSequence', label: 'Linker sequence', fullWidth: true },
+  { key: 'payload', label: 'Payload' },
+  { key: 'payloadClass', label: 'Payload class' },
+  { key: 'therapeuticTarget', label: 'Therapeutic target' },
+  { key: 'dar', label: 'DAR' },
+  { key: 'developers', label: 'Developers', fullWidth: true },
+  { key: 'clinicalPhase', label: 'Clinical phase' },
+  { key: 'drugStatus', label: 'Drug status' },
+  { key: 'approvalStatus', label: 'Approval status' },
+  { key: 'approvalCountry', label: 'Approval country' },
+  { key: 'approvalDate', label: 'Approval date' },
+  { key: 'indications', label: 'Indications', fullWidth: true },
+  { key: 'trialIds', label: 'Trial IDs', fullWidth: true },
+  { key: 'publicationReference', label: 'Publication / reference', fullWidth: true },
+  { key: 'source', label: 'Source' },
+  { key: 'sourceUrl', label: 'Source URL', fullWidth: true, isLink: true },
+  { key: 'verificationTier', label: 'Verification tier' },
+  { key: 'validationDate', label: 'Validation date' },
+  { key: 'validationNote', label: 'Validation note', fullWidth: true },
+];
+
 function parseSourceFacets(facetCounts, totalResults) {
   const counts = {};
   if (!facetCounts) {
@@ -144,7 +174,6 @@ const AdcSearchResults = ({
                   <span className={styles.rowMeta}>
                     <span className={styles.idTag}>ID: {result.adcId}</span>
                     <span className={styles.typeTag}>{meta.label}</span>
-                    {result.isNew && <span className={styles.newBadge}>New</span>}
                   </span>
                 </span>
                 <span className={styles.relevance}>
@@ -166,13 +195,15 @@ const AdcSearchResults = ({
               {expanded && result.details && (
                 <div className={styles.rowBody}>
                   <dl className={styles.detailGrid}>
-                    <DetailItem label="Drug status" value={result.details.drugStatus} />
-                    <DetailItem label="Antibody" value={result.details.antibody} />
-                    <DetailItem label="Payload" value={result.details.payload} />
-                    <DetailItem label="Linker" value={result.details.linker} />
-                    <DetailItem label="Developer" value={result.details.developer} />
-                    <DetailItem label="First approval" value={result.details.firstApproval} />
-                    <DetailItem label="Indication" value={result.details.indication} fullWidth />
+                    {ADC_DETAIL_FIELDS.map(({ key, label, fullWidth, isLink }) => (
+                      <DetailItem
+                        key={key}
+                        label={label}
+                        value={formatDetailValue(result.details[key])}
+                        fullWidth={fullWidth}
+                        isLink={isLink}
+                      />
+                    ))}
                   </dl>
                   {typeof result.searchScore === 'number' && (
                     <p className={styles.rawScore}>Match score: {result.searchScore.toFixed(4)}</p>
@@ -211,11 +242,28 @@ const AdcSearchResults = ({
   );
 };
 
-function DetailItem({ label, value, fullWidth }) {
+function formatDetailValue(value) {
+  if (value == null || value === '') return null;
+  if (Array.isArray(value)) return value.filter(Boolean).join(', ');
+  return String(value);
+}
+
+function DetailItem({ label, value, fullWidth, isLink }) {
+  const empty = value == null || value === '';
   return (
     <div className={`${styles.detailItem} ${fullWidth ? styles.detailFull : ''}`}>
       <dt>{label}</dt>
-      <dd>{value || '—'}</dd>
+      <dd>
+        {empty ? (
+          '—'
+        ) : isLink ? (
+          <a href={value} target="_blank" rel="noopener noreferrer" className={styles.detailLink}>
+            {value}
+          </a>
+        ) : (
+          value
+        )}
+      </dd>
     </div>
   );
 }

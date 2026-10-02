@@ -261,6 +261,16 @@
   font-size: var(--font-size-sm);
   color: var(--text-primary);
   line-height: 1.4;
+  word-break: break-word;
+}
+
+.detailLink {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.detailLink:hover {
+  text-decoration: underline;
 }
 
 .detailFull {

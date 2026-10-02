@@ -23,6 +23,56 @@ const mapPreferredTerms = (response) => {
   return Array.isArray(terms) ? terms : [];
 };
 
+function normalizeAdcSearchResponse(raw) {
+  if (!raw || typeof raw !== 'object') return raw;
+  const results = (raw.results ?? raw.Results ?? []).map((item) => ({
+    id: item.id ?? item.Id,
+    rank: item.rank ?? item.Rank,
+    title: item.title ?? item.Title,
+    adcId: item.adcId ?? item.AdcId ?? item.id ?? item.Id,
+    sourceType: item.sourceType ?? item.SourceType,
+    relevanceScore: item.relevanceScore ?? item.RelevanceScore,
+    searchScore: item.searchScore ?? item.SearchScore,
+    isNew: item.isNew ?? item.IsNew ?? false,
+    details: normalizeAdcDetails(item.details ?? item.Details),
+  }));
+  return {
+    ...raw,
+    results,
+    totalResults: raw.totalResults ?? raw.TotalResults ?? 0,
+    pageNumber: raw.pageNumber ?? raw.PageNumber ?? 1,
+    pageSize: raw.pageSize ?? raw.PageSize ?? 10,
+    totalPages: raw.totalPages ?? raw.TotalPages ?? 0,
+    hasNextPage: raw.hasNextPage ?? raw.HasNextPage,
+    hasPreviousPage: raw.hasPreviousPage ?? raw.HasPreviousPage,
+    sanitizedQuery: raw.sanitizedQuery ?? raw.SanitizedQuery ?? '',
+    searchTimeMs: raw.searchTimeMs ?? raw.SearchTimeMs ?? 0,
+    facetCounts: raw.facetCounts ?? raw.FacetCounts ?? {},
+  };
+}
+
+const ADC_DETAIL_KEYS = [
+  'name', 'aliases', 'normalizedAliases', 'antibody', 'targets', 'linkerCode', 'linkerType',
+  'linkerSequence', 'payload', 'payloadClass', 'therapeuticTarget', 'dar', 'developers',
+  'clinicalPhase', 'drugStatus', 'approvalStatus', 'approvalCountry', 'approvalDate',
+  'indications', 'trialIds', 'publicationReference', 'source', 'sourceUrl', 'verificationTier',
+  'validationDate', 'validationNote',
+];
+
+function toPascalCase(key) {
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+function normalizeAdcDetails(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  const out = {};
+  ADC_DETAIL_KEYS.forEach((key) => {
+    const val = raw[key] ?? raw[toPascalCase(key)];
+    if (val !== undefined && val !== null) out[key] = val;
+  });
+  return out;
+}
+
 const Search = () => {
   const dispatch = useDispatch();
   const searchSidebarOpen = useSelector(selectSearchSidebarOpen);
@@ -34,6 +84,7 @@ const Search = () => {
   const [adcError, setAdcError] = useState(null);
   const [adcHasSearched, setAdcHasSearched] = useState(false);
   const [adcSourceFilter, setAdcSourceFilter] = useState(ADC_ALL_SOURCES);
+  const [adcPeakRelevanceScore, setAdcPeakRelevanceScore] = useState(null);
 
   const [researchResponse, setResearchResponse] = useState(null);
   const [researchLoading, setResearchLoading] = useState(false);
@@ -97,26 +148,34 @@ const Search = () => {
           ? { sourceType: [sourceFilter] }
           : {};
 
-      const data = await searchApi.adcSearch({
+      const pageNum = Math.max(1, Number.parseInt(String(page), 10) || 1);
+      const payload = {
         searchQuery: query.trim(),
-        pageNumber: page,
+        pageNumber: pageNum,
         pageSize: 10,
         filters: Object.keys(filters).length ? filters : undefined,
-      });
+      };
+      if (pageNum > 1 && adcPeakRelevanceScore != null) {
+        payload.peakRelevanceScore = adcPeakRelevanceScore;
+      }
 
-      if (page === 1) {
+      const response = await searchApi.adcSearch(payload);
+      const data = response.data ?? response;
+
+      if (pageNum === 1) {
+        setAdcPeakRelevanceScore(data.peakRelevanceScore ?? data.PeakRelevanceScore ?? null);
         setRecentQueries(saveRecentSearch(query.trim()));
       }
 
-      setAdcResponse(data);
+      setAdcResponse(normalizeAdcSearchResponse(data));
     } catch (err) {
       console.error('ADC search error:', err);
-      setAdcError(err.message || 'ADC search failed.');
+      setAdcError(err.data?.message || err.message || 'ADC search failed.');
       setAdcResponse(null);
     } finally {
       setAdcLoading(false);
     }
-  }, [adcSourceFilter]);
+  }, [adcSourceFilter, adcPeakRelevanceScore]);
 
   const runResearchSearch = useCallback(async (query, page = 1, filters = researchFilters) => {
     if (!query.trim()) {
@@ -162,6 +221,7 @@ const Search = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPeakRelevanceScore(null);
+    setAdcPeakRelevanceScore(null);
     setSavedSearchLastSearchedAt(null);
     if (activeTab === TAB.ADC) {
       setAdcSourceFilter(ADC_ALL_SOURCES);
@@ -177,6 +237,7 @@ const Search = () => {
     setSaveMessage(null);
     setSavedSearchLastSearchedAt(null);
     setPeakRelevanceScore(null);
+    setAdcPeakRelevanceScore(null);
     if (activeTab === TAB.ADC) {
       setAdcResponse(null);
       setAdcError(null);
@@ -194,6 +255,7 @@ const Search = () => {
     dispatch(setSearchSidebarOpen(false));
     setSearchQuery(term);
     setPeakRelevanceScore(null);
+    setAdcPeakRelevanceScore(null);
     setSavedSearchLastSearchedAt(null);
     if (activeTab === TAB.ADC) {
       setAdcSourceFilter(ADC_ALL_SOURCES);
@@ -211,6 +273,7 @@ const Search = () => {
 
   const handleAdcSourceFilter = (source) => {
     setAdcSourceFilter(source);
+    setAdcPeakRelevanceScore(null);
     if (adcHasSearched && searchQuery.trim()) {
       runAdcSearch(searchQuery, 1, source);
     }

@@ -1,7 +1,3 @@
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { logout } from '../../../store/slices/authSlice';
-import { ROUTES } from '../../../utils/constants';
 import styles from './SearchWorkspaceSidebar.module.css';
 
 const SearchWorkspaceSidebar = ({
@@ -9,15 +5,8 @@ const SearchWorkspaceSidebar = ({
   savedSearches = [],
   onRunQuery,
   onDeleteSaved,
-  activeSection = 'search',
 }) => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate(ROUTES.HOME);
-  };
+  const savedCount = savedSearches.length;
 
   return (
     <aside className={styles.sidebar} aria-label="Search workspace">
@@ -33,90 +22,68 @@ const SearchWorkspaceSidebar = ({
         </div>
       </div>
 
-      <nav className={styles.nav}>
-        <button type="button" className={`${styles.navItem} ${activeSection === 'search' ? styles.navItemActive : ''}`}>
-          <span className={styles.navIcon}>⌕</span>
-          Search
-        </button>
-        <button type="button" className={styles.navItem}>
-          <span className={styles.navIcon}>◷</span>
-          Search history
-          {recentQueries.length > 0 && (
-            <span className={styles.badge}>{recentQueries.length}</span>
-          )}
-        </button>
-        <button type="button" className={styles.navItem}>
-          <span className={styles.navIcon}>★</span>
-          Saved searches
-          {savedSearches.length > 0 && (
-            <span className={styles.badge}>{savedSearches.length}</span>
-          )}
-        </button>
-      </nav>
-
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Recent</h2>
-        </div>
-        <div className={styles.sectionScroll}>
-          {recentQueries.length === 0 ? (
-            <p className={styles.emptyHint}>Recent searches appear here.</p>
-          ) : (
-            <ul className={styles.queryList}>
-              {recentQueries.map((term) => (
-                <li key={term}>
-                  <button type="button" className={styles.queryBtn} onClick={() => onRunQuery?.(term)}>
-                    <span className={styles.queryText}>{term}</span>
-                    <span className={styles.queryAction} aria-hidden>↗</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      <div className={styles.sectionGrow}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Saved searches</h2>
-        </div>
-        <div className={`${styles.sectionScroll} ${styles.sectionScrollGrow}`}>
-          {savedSearches.length === 0 ? (
-            <p className={styles.emptyHint}>Save a search from the bar above.</p>
-          ) : (
-            <ul className={styles.queryList}>
-              {savedSearches.map((item) => {
-                const term = item.searchTerm ?? item.SearchTerm;
-                return (
-                  <li key={term} className={styles.savedRow}>
+      <div className={styles.sectionsWrap}>
+        <section className={`${styles.sectionBlock} ${styles.sectionBlockRecent}`} aria-labelledby="sidebar-recent-heading">
+          <div className={styles.sectionHeader}>
+            <h2 id="sidebar-recent-heading" className={styles.sectionTitle}>
+              Recent
+              <span className={styles.sectionCount}>{recentQueries.length}</span>
+            </h2>
+          </div>
+          <div className={styles.sectionScroll}>
+            {recentQueries.length === 0 ? (
+              <p className={styles.emptyHint}>Recent searches appear here.</p>
+            ) : (
+              <ul className={styles.queryList}>
+                {recentQueries.map((term) => (
+                  <li key={term}>
                     <button type="button" className={styles.queryBtn} onClick={() => onRunQuery?.(term)}>
                       <span className={styles.queryText}>{term}</span>
                       <span className={styles.queryAction} aria-hidden>↗</span>
                     </button>
-                    <button
-                      type="button"
-                      className={styles.deleteBtn}
-                      onClick={() => onDeleteSaved?.(term)}
-                      aria-label={`Delete saved search ${term}`}
-                    >
-                      ×
-                    </button>
                   </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      </div>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
 
-      <button type="button" className={styles.logoutBtn} onClick={handleLogout}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-          <polyline points="16 17 21 12 16 7" />
-          <line x1="21" y1="12" x2="9" y2="12" />
-        </svg>
-        Logout
-      </button>
+        <section className={`${styles.sectionBlock} ${styles.sectionBlockSaved}`} aria-labelledby="sidebar-saved-heading">
+          <div className={styles.sectionHeader}>
+            <h2 id="sidebar-saved-heading" className={styles.sectionTitle}>
+              Saved searches
+              <span className={styles.sectionCount}>{savedCount}</span>
+            </h2>
+          </div>
+          <div className={styles.sectionScroll}>
+            {savedCount === 0 ? (
+              <p className={styles.emptyHint}>Save a search from the bar above.</p>
+            ) : (
+              <ul className={styles.queryList}>
+                {savedSearches.map((item) => {
+                  const term = item.searchTerm ?? item.SearchTerm;
+                  return (
+                    <li key={term} className={styles.savedRow}>
+                      <button type="button" className={styles.queryBtn} onClick={() => onRunQuery?.(term)}>
+                        <span className={styles.queryText}>{term}</span>
+                        <span className={styles.queryAction} aria-hidden>↗</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.deleteBtn}
+                        onClick={() => onDeleteSaved?.(term)}
+                        aria-label={`Delete saved search ${term}`}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </section>
+      </div>
     </aside>
   );
 };

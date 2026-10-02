@@ -4,6 +4,7 @@
   top: 0;
   left: 0;
   right: 0;
+  width: 100%;
   height: var(--header-height);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
@@ -12,9 +13,10 @@
 }
 
 .container {
-  max-width: var(--container-xl);
+  width: 100%;
+  max-width: none;
   height: 100%;
-  margin: 0 auto;
+  margin: 0;
   padding: 0 var(--spacing-xl);
   display: flex;
   align-items: center;

@@ -99,6 +99,12 @@ const getAuthors = (result) => {
   if (Array.isArray(authors) && authors.length > 0) {
     return authors.map((name) => String(name).trim()).filter(Boolean);
   }
+  if (typeof authors === 'string' && authors.trim()) {
+    return authors
+      .split(/[,;]/)
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }
 
   const raw = result.metadata?.authors ?? result.metadata?.Authors ?? '';
   if (!raw) return [];

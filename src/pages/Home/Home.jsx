@@ -838,7 +838,10 @@ const Home = () => {
 
           <div className={styles.workflowCard}>
             <div className={styles.workflowRailBar} aria-hidden>
-              <span className={styles.workflowRailTrack} />
+              <div className={styles.workflowRailTrack}>
+                <span className={`${styles.workflowRailDot} ${styles.workflowRailDot_accessToSearch}`} />
+                <span className={`${styles.workflowRailDot} ${styles.workflowRailDot_searchToResults}`} />
+              </div>
               {WORKFLOW_STEPS.map((item) => (
                 <div key={item.id} className={styles.workflowRailCol}>
                   <div

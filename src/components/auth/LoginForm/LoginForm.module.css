@@ -1,45 +1,53 @@
-/* Form Container */
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
-/* Header */
 .header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding-right: var(--spacing-xl);
   text-align: center;
-  margin-bottom: var(--spacing-md);
+}
+
+.logo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
 }
 
 .title {
   margin: 0;
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+  line-height: var(--line-height-tight);
   color: var(--text-primary);
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .subtitle {
-  margin: var(--spacing-sm) 0 0;
+  margin: 0;
+  max-width: 20rem;
   font-size: var(--font-size-sm);
+  line-height: 1.5;
   color: var(--text-muted);
 }
 
-/* Error Message */
 .error {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--color-error-light);
   border: 1px solid rgba(192, 112, 112, 0.25);
   border-radius: var(--radius-md);
   color: var(--color-error);
   font-size: var(--font-size-sm);
-  animation: shake 0.5s ease-in-out;
+  line-height: 1.4;
+  animation: shake 0.45s ease-in-out;
 }
 
 @keyframes shake {
@@ -47,19 +55,20 @@
   100% {
     transform: translateX(0);
   }
+
   25% {
-    transform: translateX(-5px);
+    transform: translateX(-4px);
   }
+
   75% {
-    transform: translateX(5px);
+    transform: translateX(4px);
   }
 }
 
-/* Input Group */
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 6px;
 }
 
 .label {
@@ -84,15 +93,16 @@
 
 .input {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md)
-    calc(var(--spacing-md) * 2 + 18px);
+  padding: 12px var(--spacing-md) 12px calc(var(--spacing-md) * 2 + 18px);
   font-size: var(--font-size-base);
   color: var(--text-primary);
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   outline: none;
-  transition: all var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .input::placeholder {
@@ -104,17 +114,14 @@
 }
 
 .input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
-  background: var(--bg-primary);
+  border-color: rgba(74, 120, 173, 0.55);
+  box-shadow: 0 0 0 3px rgba(74, 120, 173, 0.12);
 }
 
-.input:focus + .inputIcon,
 .inputWrapper:focus-within .inputIcon {
-  color: var(--color-primary);
+  color: var(--color-secondary);
 }
 
-/* Password Toggle */
 .togglePassword {
   position: absolute;
   right: var(--spacing-md);
@@ -133,12 +140,12 @@
   color: var(--text-primary);
 }
 
-/* Options Row */
 .options {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
+  padding-top: 2px;
 }
 
 .remember {
@@ -160,7 +167,7 @@
   justify-content: center;
   width: 18px;
   height: 18px;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
@@ -180,39 +187,40 @@
 
 .forgotLink {
   font-size: var(--font-size-sm);
-  color: var(--color-primary);
+  color: var(--color-secondary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 .forgotLink:hover {
-  color: var(--color-primary-hover);
+  color: var(--color-primary);
   text-decoration: underline;
 }
 
-/* Submit Button */
 .submitBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-xl);
+  margin-top: var(--spacing-xs);
+  padding: 13px var(--spacing-xl);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--text-inverse);
-  background: var(--gradient-primary);
+  background: var(--gradient-brand);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all var(--transition-fast);
   box-shadow: var(--shadow-md), var(--shadow-glow);
-  margin-top: var(--spacing-sm);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .submitBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), var(--shadow-glow-lg);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 .submitBtn:active:not(:disabled) {
@@ -220,7 +228,7 @@
 }
 
 .submitBtn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none;
 }
@@ -230,34 +238,33 @@
 }
 
 .submitBtn:hover:not(:disabled) svg {
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
-/* Signup Link */
-.signupText {
+.trustNote {
+  margin: var(--spacing-xs) 0 0;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
   text-align: center;
-  font-size: var(--font-size-sm);
   color: var(--text-muted);
-  margin: var(--spacing-sm) 0 0;
 }
 
-.signupLink {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  transition: color var(--transition-fast);
-}
-
-.signupLink:hover {
-  color: var(--color-primary-hover);
-  text-decoration: underline;
-}
-
-/* Responsive */
 @media (max-width: 480px) {
+  .header {
+    padding-right: 0;
+  }
+
   .options {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .error {
+    animation: none;
   }
 }

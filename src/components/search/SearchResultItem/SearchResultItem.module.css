@@ -13,9 +13,8 @@
 }
 
 .resultItem:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-lg), 0 0 0 1px var(--color-primary-light);
-  transform: translateY(-2px);
+  border-color: rgba(74, 120, 173, 0.35);
+  box-shadow: 0 6px 20px rgba(26, 36, 51, 0.06);
 }
 
 .resultItem:focus {
@@ -54,7 +53,7 @@
 }
 
 .resultItem:hover .iconWrapper {
-  transform: scale(1.1);
+  transform: scale(1.04);
 }
 
 /* Type Colors */
@@ -232,9 +231,7 @@
 }
 
 .date,
-.readTime,
-.author,
-.documentTitle {
+.readTime {
   background: var(--bg-secondary);
   padding: 2px 8px;
   border-radius: var(--radius-sm);

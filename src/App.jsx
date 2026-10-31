@@ -97,8 +97,8 @@ function App() {
       <Modal
         isOpen={isLoginModalOpen}
         onClose={handleCloseLoginModal}
-        title="Sign In"
         size="small"
+        loginVariant
       >
         <LoginForm />
       </Modal>

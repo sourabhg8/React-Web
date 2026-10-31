@@ -61,7 +61,14 @@
     rgba(69, 184, 131, 0.06) 0%,
     rgba(74, 120, 173, 0.05) 100%
   );
-  --gradient-sidebar: linear-gradient(180deg, #2d5c52 0%, var(--color-brand-night) 100%);
+  --gradient-sidebar: linear-gradient(
+    135deg,
+    #1e3a58 0%,
+    #1a314a 28%,
+    var(--color-brand-night) 62%,
+    #1e3d38 86%,
+    #2d5c52 100%
+  );
 
   --color-sidebar-text: #edf5f3;
   --color-sidebar-text-muted: rgba(237, 245, 243, 0.82);

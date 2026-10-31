@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchResultItem from '../SearchResultItem';
 import styles from './SearchResults.module.css';
 
@@ -100,8 +100,12 @@ function FacetsBar({
 }
 
 function AiSummaryPanel({ summary }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const text = summary.trim();
+
+  useEffect(() => {
+    setExpanded(true);
+  }, [text]);
 
   return (
     <div className={styles.aiSummaryPanel} role="region" aria-label="AI summary">
@@ -113,7 +117,7 @@ function AiSummaryPanel({ summary }) {
       >
         <span className={styles.aiSummaryBadge}>AI</span>
         <span className={styles.aiSummaryToggleLabel}>
-          {expanded ? 'Hide overview' : 'Show AI overview'}
+          {expanded ? 'Hide AI overview' : 'Show AI overview'}
         </span>
         <span className={`${styles.aiSummaryChevron} ${expanded ? styles.aiSummaryChevronOpen : ''}`} aria-hidden>
           ▾

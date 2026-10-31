@@ -34,6 +34,71 @@
   max-width: 400px;
 }
 
+.loginModal {
+  position: relative;
+  max-width: 420px;
+  border-radius: var(--radius-2xl);
+  border: 1px solid rgba(210, 218, 226, 0.95);
+  box-shadow:
+    0 1px 2px rgba(26, 36, 51, 0.04),
+    0 24px 64px rgba(26, 36, 51, 0.14);
+  overflow: hidden;
+}
+
+.loginModalAccent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(74, 120, 173, 0.85) 0%,
+    rgba(69, 184, 131, 0.85) 55%,
+    rgba(120, 96, 200, 0.75) 100%
+  );
+  pointer-events: none;
+}
+
+.loginCloseButton {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.loginCloseButton:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+  background: var(--bg-primary);
+}
+
+.loginCloseButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.loginContent {
+  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
+  overflow-y: auto;
+  flex: 1;
+}
+
 .medium {
   width: 100%;
   max-width: 560px;

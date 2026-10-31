@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { openLoginModal } from "../../store/slices/uiSlice";
@@ -5,114 +6,655 @@ import { selectIsAuthenticated, selectUser } from "../../store/slices/authSlice"
 import { ROUTES, ROLES } from "../../utils/constants";
 import styles from "./Home.module.css";
 
+const iconProps = {
+  width: 22,
+  height: 22,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.5,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": true,
+};
+
 const FEATURES = [
   {
-    title: "Hybrid AI Search",
+    title: "Comprehensive Coverage",
     description:
-      "Combine semantic vector search with full-text retrieval to surface the most relevant passages across millions of indexed chunks.",
+      "Search across millions of indexed medical literature chunks from PubMed, PMC, and curated sources.",
+    tone: "green",
+    index: "01",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.35-4.35" />
-        <path d="M11 8v6" />
-        <path d="M8 11h6" />
+      <svg
+        width={24}
+        height={24}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.85}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <g className={styles.bookCovers}>
+          <path d="M12 21V7" />
+          <path d="M12 7a4 4 0 0 0-4-4H4v16a3 3 0 0 1 3-3h5" />
+          <path d="M12 7a4 4 0 0 1 4-4h4v16a3 3 0 0 0-3-3h-5" />
+        </g>
+        <g className={styles.bookPages}>
+          <path d="M7 10.5h4" />
+          <path d="M7 13.5h3.5" />
+          <path d="M7 16.5h4" />
+          <path d="M13 10.5h4" />
+          <path d="M13 13.5h3.5" />
+          <path d="M13 16.5h4" />
+        </g>
       </svg>
     ),
   },
   {
-    title: "AI Research Summaries",
+    title: "AI-Generated Summaries",
     description:
-      "Get concise, evidence-grounded answers synthesized from top-ranked passages — so you grasp findings faster without reading every paper.",
+      "Get concise, evidence-grounded answers synthesized from top-ranked passages in seconds.",
+    tone: "blue",
+    index: "02",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93L12 22" />
-        <path d="M8.5 10.5C6.57 10.06 5 8.36 5 6.25A4 4 0 0 1 9 2.26" />
-        <path d="M15.5 10.5c1.93-.44 3.5-2.14 3.5-4.25A4 4 0 0 0 15 2.26" />
+      <svg {...iconProps}>
+        <rect x="6" y="6" width="12" height="12" rx="2" />
+        <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" />
+        <text
+          x="12"
+          y="13.5"
+          textAnchor="middle"
+          fill="currentColor"
+          stroke="none"
+          fontSize="5.5"
+          fontWeight="700"
+          fontFamily="system-ui, sans-serif"
+        >
+          AI
+        </text>
       </svg>
     ),
   },
   {
-    title: "Multi-Source Corpus",
+    title: "Relevance-Ranked Results",
     description:
-      "Literature indexed from PubMed, PMC, and other curated medical sources — normalized, chunked, and ready for enterprise search.",
+      "Hybrid semantic and keyword search surfaces the most relevant passages for your query.",
+    tone: "purple",
+    index: "03",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg {...iconProps}>
+        <path d="M3 20V4" />
+        <path d="M3 20h18" />
+        <path d="M8 20V15" />
+        <path d="M12 20V10" />
+        <path d="M16 20V5" />
+      </svg>
+    ),
+  },
+  {
+    title: "Secure & Enterprise Ready",
+    description:
+      "Role-based access, compliance-ready infrastructure, and organization-level administration.",
+    tone: "orange",
+    index: "04",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <rect x="9" y="11" width="6" height="5" rx="1" />
+        <path d="M11 11V9.5a1 1 0 0 1 2 0V11" />
+        <path d="M12 14v1" />
+      </svg>
+    ),
+  },
+];
+
+const STATS = [
+  {
+    value: "1M+",
+    label: "Indexed chunks",
+    accent: "green",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        <line x1="8" y1="7" x2="16" y2="7" />
-        <line x1="8" y1="11" x2="14" y2="11" />
       </svg>
     ),
   },
   {
-    title: "Subscription Access",
-    description:
-      "Organizations subscribe to unlock search, seat management, and role-based access for research teams and clinical workflows.",
+    value: "Multi",
+    label: "Medical sources",
+    accent: "blue",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <ellipse cx="12" cy="5" rx="9" ry="3" />
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+      </svg>
+    ),
+  },
+  {
+    value: "AI",
+    label: "Powered search",
+    accent: "violet",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+      </svg>
+    ),
+  },
+  {
+    value: "Trusted",
+    label: "By research teams",
+    accent: "amber",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
     ),
   },
 ];
 
-const STEPS = [
+const LEADING_SOURCES = [
+  { name: "PubMed", abbr: "PM", tone: "teal" },
+  { name: "PMC", abbr: "PMC", tone: "blue" },
+  { name: "ClinicalTrials.gov", abbr: "CT", tone: "violet" },
+  { name: "Curated Sources", abbr: "CS", tone: "amber" },
+];
+
+const WORKFLOW_STEPS = [
   {
-    step: "01",
-    title: "Subscribe your organization",
-    description: "Choose a plan that fits your team size and research volume.",
+    id: "access",
+    phase: "Access",
+    title: "Sign in with your credentials",
+    description:
+      "Use your organization username and password to enter a secure, role-based workspace.",
+    tone: "blue",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
   },
   {
-    step: "02",
-    title: "Search across indexed literature",
-    description: "Query by topic, filter by source and year, and explore ranked passages.",
+    id: "discover",
+    phase: "Discover",
+    title: "Search indexed literature",
+    description:
+      "Query by topic, filter by source and year, and explore ranked passages from PubMed, PMC, and more.",
+    tone: "green",
+    icon: (
+      <svg {...iconProps}>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </svg>
+    ),
   },
   {
-    step: "03",
+    id: "understand",
+    phase: "Understand",
     title: "Review AI insights & sources",
-    description: "Read featured summaries and jump to original publications with full metadata.",
+    description:
+      "Read evidence-grounded summaries and open original publications with full citation metadata.",
+    tone: "violet",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M12 3 3 7.5v9L12 21l9-4.5v-9L12 3z" />
+        <path d="M12 12 3 7.5M12 12l9-4.5M12 12v9" />
+      </svg>
+    ),
   },
 ];
 
-const PLANS = [
+const ACCREDITATION = [
   {
-    name: "Research",
-    price: "$49",
-    period: "/ seat / mo",
-    description: "For individual researchers and small teams getting started.",
-    features: ["Hybrid AI search", "Source & year filters", "AI summaries", "Up to 5 seats"],
-    highlighted: false,
+    src: "/accreditation/hipaa.png",
+    alt: "HIPAA Compliant",
+    label: "HIPAA compliant",
+    detail: "Healthcare data safeguards",
+    tone: "green",
   },
   {
-    name: "Professional",
-    price: "$149",
-    period: "/ seat / mo",
-    description: "For growing organizations with higher search volume.",
-    features: [
-      "Everything in Research",
-      "Priority search performance",
-      "Org admin & user management",
-      "Up to 25 seats",
-    ],
-    highlighted: true,
+    src: "/accreditation/gdpr.png",
+    alt: "EU GDPR Compliant",
+    label: "EU GDPR",
+    detail: "Privacy & data protection",
+    tone: "blue",
   },
   {
-    name: "Enterprise",
-    price: "Custom",
-    period: "",
-    description: "For institutions needing scale, compliance, and dedicated support.",
-    features: [
-      "Unlimited seats",
-      "Custom source integrations",
-      "SLA & dedicated support",
-      "Advanced security controls",
-    ],
-    highlighted: false,
+    src: "/accreditation/ephmra.png",
+    alt: "EPHMRA Agency Member",
+    label: "EPHMRA member",
+    detail: "Pharmaceutical market research",
+    tone: "amber",
+    wide: true,
   },
 ];
 
-const SOURCES = ["PubMed", "PMC", "Clinical Guidelines", "Peer-reviewed Journals"];
+const WORKFLOW_DEMO_QUERY = "ADC payload linker stability";
+const WORKFLOW_DEMO_USERNAME = "analyst@organization.com";
+const WORKFLOW_DEMO_PASSWORD_LEN = 8;
+const WORKFLOW_AI_SUMMARY =
+  "Linker stability relates to payload release and tolerability in recent ADC studies.";
+const WORKFLOW_RANKED_RESULTS = [
+  { title: "Payload-linker design in antibody–drug conjugates", relevance: 98 },
+  { title: "Stability of cleavable ADC linkers in vivo", relevance: 94 },
+  { title: "Clinical tolerability of next-gen conjugates", relevance: 89 },
+];
+
+const WorkflowSecureAccessDemo = () => {
+  const [phase, setPhase] = useState("credentials");
+  const [usernameLength, setUsernameLength] = useState(0);
+  const [passwordLength, setPasswordLength] = useState(0);
+  const [focusedField, setFocusedField] = useState("username");
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      setPhase("unlocked");
+      setUsernameLength(WORKFLOW_DEMO_USERNAME.length);
+      setPasswordLength(WORKFLOW_DEMO_PASSWORD_LEN);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const timeouts = [];
+
+    const schedule = (fn, ms) => {
+      const id = window.setTimeout(fn, ms);
+      timeouts.push(id);
+      return id;
+    };
+
+    const runCycle = () => {
+      if (cancelled) return;
+
+      setPhase("credentials");
+      setUsernameLength(0);
+      setPasswordLength(0);
+      setFocusedField("username");
+
+      let userIndex = 0;
+      const typeUsername = () => {
+        if (cancelled) return;
+        userIndex += 1;
+        setUsernameLength(userIndex);
+        if (userIndex < WORKFLOW_DEMO_USERNAME.length) {
+          schedule(typeUsername, 52);
+          return;
+        }
+        schedule(() => {
+          if (cancelled) return;
+          setFocusedField("password");
+          let passIndex = 0;
+          const typePassword = () => {
+            if (cancelled) return;
+            passIndex += 1;
+            setPasswordLength(passIndex);
+            if (passIndex < WORKFLOW_DEMO_PASSWORD_LEN) {
+              schedule(typePassword, 78);
+              return;
+            }
+            schedule(() => {
+              if (cancelled) return;
+              setPhase("signing");
+              setFocusedField(null);
+              schedule(() => {
+                if (cancelled) return;
+                setPhase("unlocked");
+                schedule(runCycle, 2800);
+              }, 1400);
+            }, 450);
+          };
+          schedule(typePassword, 320);
+        }, 380);
+      };
+
+      schedule(typeUsername, 650);
+    };
+
+    schedule(runCycle, 500);
+
+    return () => {
+      cancelled = true;
+      timeouts.forEach((id) => window.clearTimeout(id));
+    };
+  }, []);
+
+  const isSigning = phase === "signing";
+  const isUnlocked = phase === "unlocked";
+  const isCredentials = phase === "credentials";
+
+  return (
+    <>
+      <div className={styles.workflowPreviewHead}>
+        <div
+          className={[
+            styles.workflowPreviewIcon,
+            styles.workflowPreviewIcon_blue,
+            isUnlocked ? styles.workflowPreviewIcon_unlocked : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {WORKFLOW_STEPS[0].icon}
+        </div>
+        <span className={styles.workflowPreviewLabel}>Sign in</span>
+      </div>
+
+      <div className={styles.workflowPreviewMain}>
+        {isUnlocked ? (
+          <div className={`${styles.workflowAccessField} ${styles.workflowAccessField_unlocked}`}>
+            <span className={styles.workflowAccessGranted}>
+              Signed in as {WORKFLOW_DEMO_USERNAME}
+            </span>
+          </div>
+        ) : (
+          <div className={styles.workflowLoginForm}>
+            <label className={styles.workflowLoginLabel}>
+              Username
+              <span
+                className={[
+                  styles.workflowAccessField,
+                  styles.workflowAccessField_username,
+                  focusedField === "username" ? styles.workflowAccessField_focus : "",
+                  isSigning ? styles.workflowAccessField_busy : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {WORKFLOW_DEMO_USERNAME.slice(0, usernameLength)}
+                {isCredentials && focusedField === "username" && (
+                  <span className={styles.workflowPreviewCaret} aria-hidden />
+                )}
+              </span>
+            </label>
+            <label className={styles.workflowLoginLabel}>
+              Password
+              <span
+                className={[
+                  styles.workflowAccessField,
+                  styles.workflowAccessField_password,
+                  focusedField === "password" ? styles.workflowAccessField_focus : "",
+                  isSigning ? styles.workflowAccessField_busy : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <span className={styles.workflowPasswordMask} aria-hidden>
+                  {"•".repeat(passwordLength)}
+                </span>
+                {isCredentials && focusedField === "password" && (
+                  <span className={styles.workflowPreviewCaret} aria-hidden />
+                )}
+              </span>
+            </label>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.workflowPreviewActions}>
+        <span
+          className={[
+            styles.workflowAccessBtn,
+            isSigning ? styles.workflowAccessBtn_loading : "",
+            isUnlocked ? styles.workflowAccessBtn_done : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {isUnlocked ? (
+            <>
+              <span className={styles.workflowAccessBtnCheck} aria-hidden>
+                ✓
+              </span>
+              Access granted
+            </>
+          ) : isSigning ? (
+            "Signing in…"
+          ) : (
+            "Sign in"
+          )}
+        </span>
+      </div>
+
+      <div className={styles.workflowPreviewFoot}>
+        <span
+          className={[
+            styles.workflowPreviewChip,
+            isUnlocked ? styles.workflowPreviewChip_live : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {isUnlocked ? "Encrypted session · Active" : "Username & password"}
+        </span>
+      </div>
+    </>
+  );
+};
+
+const WorkflowQueryTyping = ({ text, className, caretClassName }) => {
+  const [visibleLength, setVisibleLength] = useState(0);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      setVisibleLength(text.length);
+      return undefined;
+    }
+
+    let cancelled = false;
+    let timeoutId;
+
+    const runCycle = () => {
+      let index = 0;
+      setVisibleLength(0);
+
+      const typeNext = () => {
+        if (cancelled) return;
+        index += 1;
+        setVisibleLength(index);
+        if (index < text.length) {
+          timeoutId = window.setTimeout(typeNext, 58);
+          return;
+        }
+        timeoutId = window.setTimeout(() => {
+          if (!cancelled) runCycle();
+        }, 2600);
+      };
+
+      timeoutId = window.setTimeout(typeNext, 700);
+    };
+
+    runCycle();
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [text]);
+
+  return (
+    <span className={className}>
+      {text.slice(0, visibleLength)}
+      <span className={caretClassName} aria-hidden />
+    </span>
+  );
+};
+
+const WorkflowInsightDemo = () => {
+  const [phase, setPhase] = useState("generating");
+  const [summaryLength, setSummaryLength] = useState(0);
+  const [visibleResults, setVisibleResults] = useState(0);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      setPhase("results");
+      setSummaryLength(WORKFLOW_AI_SUMMARY.length);
+      setVisibleResults(WORKFLOW_RANKED_RESULTS.length);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const timeouts = [];
+
+    const schedule = (fn, ms) => {
+      const id = window.setTimeout(fn, ms);
+      timeouts.push(id);
+      return id;
+    };
+
+    const revealResults = (count) => {
+      if (cancelled) return;
+      if (count > WORKFLOW_RANKED_RESULTS.length) {
+        schedule(() => {
+          if (!cancelled) runCycle();
+        }, 2800);
+        return;
+      }
+      setVisibleResults(count);
+      schedule(() => revealResults(count + 1), 420);
+    };
+
+    const typeSummary = (index) => {
+      if (cancelled) return;
+      const next = index + 1;
+      setSummaryLength(next);
+      if (next < WORKFLOW_AI_SUMMARY.length) {
+        schedule(() => typeSummary(next), 36);
+        return;
+      }
+      schedule(() => {
+        if (cancelled) return;
+        setPhase("results");
+        setVisibleResults(0);
+        schedule(() => revealResults(1), 320);
+      }, 480);
+    };
+
+    const runCycle = () => {
+      if (cancelled) return;
+      setPhase("generating");
+      setSummaryLength(0);
+      setVisibleResults(0);
+      schedule(() => {
+        if (cancelled) return;
+        setPhase("summary");
+        schedule(() => typeSummary(0), 200);
+      }, 1100);
+    };
+
+    schedule(runCycle, 900);
+
+    return () => {
+      cancelled = true;
+      timeouts.forEach((id) => window.clearTimeout(id));
+    };
+  }, []);
+
+  const isGenerating = phase === "generating";
+  const isSummary = phase === "summary";
+  const isResults = phase === "results";
+
+  return (
+    <>
+      <div className={styles.workflowPreviewHead}>
+        <div
+          className={[
+            styles.workflowPreviewIcon,
+            styles.workflowPreviewIcon_violet,
+            isResults ? styles.workflowPreviewIcon_unlocked : "",
+            isGenerating ? styles.workflowPreviewIcon_aiBusy : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {WORKFLOW_STEPS[2].icon}
+        </div>
+        <span className={styles.workflowPreviewLabel}>AI summary</span>
+      </div>
+
+      <div className={styles.workflowPreviewMain}>
+        <div
+          className={[
+            styles.workflowInsightSummary,
+            isGenerating ? styles.workflowInsightSummary_loading : "",
+            isResults ? styles.workflowInsightSummary_ready : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {isGenerating ? (
+            <div className={styles.workflowInsightSkeleton} aria-hidden>
+              <span />
+              <span />
+              <span />
+            </div>
+          ) : (
+            <>
+              <span className={styles.workflowInsightAiTag}>AI</span>
+              <p className={styles.workflowInsightSummaryText}>
+                {WORKFLOW_AI_SUMMARY.slice(0, summaryLength)}
+                {isSummary && <span className={styles.workflowPreviewCaret} aria-hidden />}
+              </p>
+            </>
+          )}
+        </div>
+
+        <div className={styles.workflowInsightResultsWrap}>
+          <span className={styles.workflowInsightResultsLabel}>
+            {isGenerating || isSummary ? "Preparing ranked passages…" : "Ranked by relevance"}
+          </span>
+          <ul className={styles.workflowInsightResults}>
+            {WORKFLOW_RANKED_RESULTS.map((item, index) => (
+              <li
+                key={item.title}
+                className={[
+                  styles.workflowInsightResult,
+                  index < visibleResults ? styles.workflowInsightResult_visible : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <span className={styles.workflowInsightRank}>{index + 1}</span>
+                <span className={styles.workflowInsightTitle}>{item.title}</span>
+                <span className={styles.workflowInsightScore}>{item.relevance}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className={styles.workflowPreviewActions} aria-hidden />
+
+      <div className={styles.workflowPreviewFoot}>
+        <span
+          className={[
+            styles.workflowPreviewChip,
+            styles.workflowPreviewChip_insight,
+            isResults && visibleResults >= WORKFLOW_RANKED_RESULTS.length
+              ? styles.workflowPreviewChip_live
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {isResults && visibleResults >= WORKFLOW_RANKED_RESULTS.length
+            ? "PMID · sources linked"
+            : "Evidence-grounded"}
+        </span>
+      </div>
+    </>
+  );
+};
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -138,180 +680,305 @@ const Home = () => {
 
   return (
     <div className={styles.home}>
-      {/* Hero */}
-      <section className={styles.hero}>
-        <div className={styles.heroBackground}>
-          <div className={styles.gridPattern} />
-          <div className={styles.glowOrb} />
-          <div className={styles.glowOrb2} />
-        </div>
+      <section className={styles.hero} aria-label="Platform overview">
+        <div className={styles.heroOverlay} aria-hidden />
+        <div className={styles.heroInner}>
+          <div className={styles.heroCopy}>
+            <span className={styles.badge}>
+              <span className={styles.badgeDot} />
+              Medical research intelligence platform
+            </span>
 
-        <div className={styles.heroContent}>
-          <span className={styles.badge}>
-            <span className={styles.badgeDot} />
-            Medical research intelligence platform
-          </span>
-
-          <h1 className={styles.heroTitle}>
-            AI-powered search across
-            <span className={styles.gradientText}> indexed medical literature</span>
-          </h1>
-
-          <p className={styles.heroSubtitle}>
-            Explore research from PubMed, PMC, and curated sources. Organizations
-            subscribe for secure access to hybrid search, relevance-ranked results,
-            and AI-generated summaries grounded in the evidence.
-          </p>
-
-          <div className={styles.heroCta}>
-            <button type="button" className={styles.primaryBtn} onClick={handlePrimaryCta}>
-              {canSearch ? "Open Research Search" : "Get Started"}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </button>
-            <button type="button" className={styles.secondaryBtn} onClick={() => scrollTo("how-it-works")}>
-              See how it works
-            </button>
-          </div>
-
-          <div className={styles.stats}>
-            <div className={styles.stat}>
-              <span className={styles.statValue}>1M+</span>
-              <span className={styles.statLabel}>Indexed chunks</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <span className={styles.statValue}>Multi</span>
-              <span className={styles.statLabel}>Medical sources</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <span className={styles.statValue}>AI</span>
-              <span className={styles.statLabel}>Featured summaries</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Sources strip */}
-      <section className={styles.sourcesStrip}>
-        <div className={styles.sourcesInner}>
-          <span className={styles.sourcesLabel}>Indexed from</span>
-          <div className={styles.sourcesList}>
-            {SOURCES.map((source) => (
-              <span key={source} className={styles.sourcePill}>
-                {source}
+            <h1 className={styles.heroTitle}>
+              <span className={styles.heroTitleLead}>AI-powered search across</span>
+              <span className={`${styles.gradientText} ${styles.heroTitleAccent}`}>
+                indexed medical literature
               </span>
-            ))}
-          </div>
-        </div>
-      </section>
+            </h1>
 
-      {/* Features */}
-      <section className={styles.features} id="features">
-        <div className={styles.sectionContainer}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionEyebrow}>Platform capabilities</span>
-            <h2 className={styles.sectionTitle}>
-              Built for <span className={styles.gradientText}>clinical & research teams</span>
-            </h2>
-            <p className={styles.sectionSubtitle}>
-              From literature discovery to evidence synthesis — one subscription,
-              one search experience across your organization&apos;s corpus.
+            <p className={styles.heroSubtitle}>
+              Hybrid search and relevance-ranked results from PubMed, PMC, and curated sources —
+              with AI summaries grounded in the evidence.
             </p>
-          </div>
 
-          <div className={styles.featuresGrid}>
-            {FEATURES.map((feature) => (
-              <article key={feature.title} className={styles.featureCard}>
-                <div className={styles.featureIcon}>{feature.icon}</div>
-                <h3 className={styles.featureTitle}>{feature.title}</h3>
-                <p className={styles.featureDesc}>{feature.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className={styles.howItWorks} id="how-it-works">
-        <div className={styles.sectionContainer}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionEyebrow}>How it works</span>
-            <h2 className={styles.sectionTitle}>From subscription to insight</h2>
-          </div>
-
-          <div className={styles.stepsGrid}>
-            {STEPS.map((item) => (
-              <div key={item.step} className={styles.stepCard}>
-                <span className={styles.stepNumber}>{item.step}</span>
-                <h3 className={styles.stepTitle}>{item.title}</h3>
-                <p className={styles.stepDesc}>{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section className={styles.pricing} id="pricing">
-        <div className={styles.sectionContainer}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionEyebrow}>Subscriptions</span>
-            <h2 className={styles.sectionTitle}>Plans for every research team</h2>
-            <p className={styles.sectionSubtitle}>
-              Organizations purchase seats. Researchers get full access to search and AI summaries.
-            </p>
-          </div>
-
-          <div className={styles.plansGrid}>
-            {PLANS.map((plan) => (
-              <article
-                key={plan.name}
-                className={`${styles.planCard} ${plan.highlighted ? styles.planHighlighted : ""}`}
-              >
-                {plan.highlighted && <span className={styles.planBadge}>Most popular</span>}
-                <h3 className={styles.planName}>{plan.name}</h3>
-                <div className={styles.planPrice}>
-                  <span className={styles.planAmount}>{plan.price}</span>
-                  {plan.period && <span className={styles.planPeriod}>{plan.period}</span>}
-                </div>
-                <p className={styles.planDesc}>{plan.description}</p>
-                <ul className={styles.planFeatures}>
-                  {plan.features.map((f) => (
-                    <li key={f}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  type="button"
-                  className={plan.highlighted ? styles.planBtnPrimary : styles.planBtnSecondary}
-                  onClick={handlePrimaryCta}
-                >
-                  {plan.name === "Enterprise" ? "Contact sales" : "Get started"}
+            <div className={styles.heroCtaBlock}>
+              <div className={styles.heroCta}>
+                <button type="button" className={styles.primaryBtn} onClick={handlePrimaryCta}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+                  {canSearch ? "Open research workspace" : "Get started"}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
                 </button>
-              </article>
-            ))}
+                <button type="button" className={styles.secondaryBtn} onClick={() => scrollTo("how-it-works")}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                  See how it works
+                </button>
+              </div>
+              {!canSearch && (
+                <p className={styles.heroCtaNote}>Sign in with your organization account</p>
+              )}
+              <ul className={styles.heroTrust} aria-label="Sources and capabilities">
+                <li className={styles.heroTrustItem}>PubMed &amp; PMC</li>
+                <li className={styles.heroTrustItem}>Hybrid search</li>
+                <li className={styles.heroTrustItem}>Evidence-grounded summaries</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className={styles.cta}>
-        <div className={styles.ctaInner}>
-          <h2 className={styles.ctaTitle}>Ready to search the literature?</h2>
-          <p className={styles.ctaText}>
-            Sign in with your organization account or contact us to set up a subscription.
-          </p>
-          <button type="button" className={styles.primaryBtn} onClick={handlePrimaryCta}>
-            {canSearch ? "Go to Research Search" : "Sign in to search"}
-          </button>
+      <section className={styles.platform} id="features">
+        <div className={styles.sectionContainer}>
+          <header className={styles.platformHeader}>
+            <h2 className={styles.platformHeading}>Built for rigorous medical research</h2>
+            <p className={styles.platformLead}>
+              Hybrid search, ranked evidence, and AI summaries in one workspace.
+            </p>
+          </header>
+
+          <div className={styles.platformCard}>
+            <div className={styles.featuresGrid}>
+              {FEATURES.map((feature) => (
+                <article
+                  key={feature.title}
+                  className={`${styles.featureCard} ${styles[`featureCard_${feature.tone}`]}`}
+                >
+                  <span className={styles.featureIndex} aria-hidden>
+                    {feature.index}
+                  </span>
+                  <div className={`${styles.featureIcon} ${styles[`featureIcon_${feature.tone}`]}`}>
+                    {feature.icon}
+                  </div>
+                  <h3 className={styles.featureTitle}>{feature.title}</h3>
+                  <p className={styles.featureDesc}>{feature.description}</p>
+                </article>
+              ))}
+            </div>
+
+            <div className={styles.platformBridge} aria-hidden>
+              <span className={styles.platformBridgeLine} />
+              <span className={styles.platformBridgePill}>
+                <span className={styles.platformBridgeDot} />
+                Platform impact
+              </span>
+              <span className={styles.platformBridgeLine} />
+            </div>
+
+            <div className={styles.statsBand} aria-label="Platform at a glance">
+              <div className={styles.statsBandGlow} aria-hidden />
+              {STATS.map((stat) => (
+                <div
+                  key={stat.label}
+                  className={`${styles.statItem} ${styles[`statItem_${stat.accent}`]}`}
+                >
+                  <span className={styles.statIcon}>{stat.icon}</span>
+                  <div className={styles.statCopy}>
+                    <span className={styles.statValue}>{stat.value}</span>
+                    <span className={styles.statLabel}>{stat.label}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.platformBridge} aria-hidden>
+              <span className={styles.platformBridgeLine} />
+              <span className={styles.platformBridgePill}>
+                <span className={styles.platformBridgeDot} />
+                Indexed corpora
+              </span>
+              <span className={styles.platformBridgeLine} />
+            </div>
+
+            <div className={styles.sourcesBlock}>
+              <div className={styles.sourcesMesh} aria-hidden />
+              <div className={styles.sourcesIntro}>
+                <h3 className={styles.sourcesHeading}>Search across leading sources</h3>
+                <p className={styles.sourcesSub}>
+                  Unified hybrid search over peer-reviewed and curated medical indexes.
+                </p>
+              </div>
+              <div className={styles.sourcesGrid}>
+                {LEADING_SOURCES.map((source) => (
+                  <div
+                    key={source.name}
+                    className={`${styles.sourceCard} ${styles[`sourceCard_${source.tone}`]}`}
+                  >
+                    <span className={styles.sourceMark} aria-hidden>
+                      {source.abbr}
+                    </span>
+                    <div className={styles.sourceMeta}>
+                      <span className={styles.sourceName}>{source.name}</span>
+                      <span className={styles.sourceTag}>Indexed</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.accredited} id="accredited">
+        <div className={styles.accreditedAmbient} aria-hidden />
+        <div className={styles.sectionContainer}>
+          <header className={styles.accreditedHeader}>
+            <div className={styles.accreditedBridge}>
+              <span className={styles.accreditedBridgeLine} />
+              <span className={styles.accreditedBridgePill}>
+                <span className={styles.accreditedBridgeDot} />
+                Trust & compliance
+              </span>
+              <span className={styles.accreditedBridgeLine} />
+            </div>
+            <h2 className={styles.accreditedHeading}>Accredited by</h2>
+            <p className={styles.accreditedLead}>
+              Independent recognition for security, privacy, and professional standards.
+            </p>
+          </header>
+
+          <div className={styles.accreditedCard}>
+            <div className={styles.accreditedCardSheen} aria-hidden />
+            <div className={styles.accreditedGrid}>
+              {ACCREDITATION.map((item) => (
+                <figure
+                  key={item.alt}
+                  className={[
+                    styles.accreditedItem,
+                    item.wide ? styles.accreditedItemWide : "",
+                    styles[`accreditedItem_${item.tone}`],
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <div className={styles.accreditedLogoPlate}>
+                    <img
+                      src={item.src}
+                      alt={item.alt}
+                      className={styles.accreditedLogo}
+                      loading="lazy"
+                    />
+                  </div>
+                  <figcaption className={styles.accreditedCaption}>
+                    <span className={styles.accreditedLabel}>{item.label}</span>
+                    <span className={styles.accreditedDetail}>{item.detail}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.workflow} id="how-it-works" aria-labelledby="workflow-heading">
+        <div className={styles.workflowGlow} aria-hidden />
+        <div className={styles.sectionContainer}>
+          <header className={styles.workflowHeader}>
+            <div className={styles.workflowBridge}>
+              <span className={styles.workflowBridgeLine} />
+              <span className={styles.workflowBridgePill}>
+                <span className={styles.workflowBridgeDot} />
+                How it works
+              </span>
+              <span className={styles.workflowBridgeLine} />
+            </div>
+            <h2 className={styles.workflowHeading} id="workflow-heading">
+              From question to evidence
+            </h2>
+            <p className={styles.workflowLead}>
+              Three connected stages — secure access, intelligent search, and traceable answers backed
+              by source literature.
+            </p>
+          </header>
+
+          <div className={styles.workflowCard}>
+            <div className={styles.workflowRailBar} aria-hidden>
+              <div className={styles.workflowRailTrack}>
+                <span className={`${styles.workflowRailDot} ${styles.workflowRailDot_accessToSearch}`} />
+                <span className={`${styles.workflowRailDot} ${styles.workflowRailDot_searchToResults}`} />
+              </div>
+              {WORKFLOW_STEPS.map((item) => (
+                <div key={item.id} className={styles.workflowRailCol}>
+                  <div
+                    className={`${styles.workflowNode} ${styles[`workflowNode_${item.tone}`]}`}
+                  >
+                    <span className={styles.workflowNodeIcon}>{item.icon}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <ol className={styles.workflowStages}>
+              {WORKFLOW_STEPS.map((item) => (
+                <li key={item.id} className={styles.workflowColumn}>
+                  <article
+                    className={`${styles.workflowStage} ${styles[`workflowStage_${item.tone}`]}`}
+                  >
+                    <span className={styles.workflowPhase}>{item.phase}</span>
+                    <h3 className={styles.workflowStageTitle}>{item.title}</h3>
+                    <p className={styles.workflowStageDesc}>{item.description}</p>
+                  </article>
+                </li>
+              ))}
+            </ol>
+
+            <div className={styles.workflowPreview} aria-hidden>
+              <div
+                className={[
+                  styles.workflowPreviewPanel,
+                  styles.workflowPreviewPanel_access,
+                ].join(" ")}
+              >
+                <WorkflowSecureAccessDemo />
+              </div>
+              <div
+                className={[
+                  styles.workflowPreviewPanel,
+                  styles.workflowPreviewPanel_query,
+                  styles.workflowPreviewPanel_active,
+                ].join(" ")}
+              >
+                <div className={styles.workflowPreviewHead}>
+                  <div
+                    className={`${styles.workflowPreviewIcon} ${styles.workflowPreviewIcon_green}`}
+                  >
+                    {WORKFLOW_STEPS[1].icon}
+                  </div>
+                  <span className={styles.workflowPreviewLabel}>Query</span>
+                </div>
+                <div className={styles.workflowPreviewMain}>
+                  <WorkflowQueryTyping
+                    text={WORKFLOW_DEMO_QUERY}
+                    className={styles.workflowPreviewSearch}
+                    caretClassName={styles.workflowPreviewCaret}
+                  />
+                </div>
+                <div className={styles.workflowPreviewActions}>
+                  <span className={styles.workflowPreviewFilters}>
+                    <span>PubMed</span>
+                    <span>2020–2026</span>
+                  </span>
+                </div>
+                <div className={styles.workflowPreviewFoot}>
+                  <span className={styles.workflowPreviewChip}>Hybrid · ranked</span>
+                </div>
+              </div>
+              <div
+                className={[
+                  styles.workflowPreviewPanel,
+                  styles.workflowPreviewPanel_insight,
+                ].join(" ")}
+              >
+                <WorkflowInsightDemo />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

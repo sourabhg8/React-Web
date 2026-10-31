@@ -422,17 +422,19 @@ const Search = () => {
                   ×
                 </button>
               )}
-              <button type="submit" className={styles.searchBtn} disabled={isLoading}>
-                {isLoading ? <span className={styles.btnSpinner} /> : 'Search'}
-              </button>
-              <button
-                type="button"
-                className={styles.saveBtn}
-                onClick={handleSaveSearch}
-                disabled={!searchQuery.trim() || isSavingSearch || isCurrentQuerySaved}
-              >
-                {isSavingSearch ? 'Saving…' : isCurrentQuerySaved ? 'Saved' : 'Save search'}
-              </button>
+              <div className={styles.searchActions}>
+                <button type="submit" className={styles.searchBtn} disabled={isLoading}>
+                  {isLoading ? <span className={styles.btnSpinner} /> : 'Search'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  onClick={handleSaveSearch}
+                  disabled={!searchQuery.trim() || isSavingSearch || isCurrentQuerySaved}
+                >
+                  {isSavingSearch ? 'Saving…' : isCurrentQuerySaved ? 'Saved' : 'Save'}
+                </button>
+              </div>
             </div>
             {saveMessage && <p className={styles.saveMessage}>{saveMessage}</p>}
           </form>

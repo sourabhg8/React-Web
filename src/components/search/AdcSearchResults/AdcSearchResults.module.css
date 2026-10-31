@@ -10,9 +10,24 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
+  min-height: 260px;
   padding: var(--spacing-2xl);
   text-align: center;
   color: var(--text-muted);
+}
+
+.stateBox h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.stateBox p {
+  margin: 0;
+  max-width: 22rem;
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
 }
 
 .spinner {

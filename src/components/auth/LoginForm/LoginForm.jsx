@@ -23,7 +23,6 @@ const LoginForm = () => {
       [name]: value,
     }));
 
-    // Clear error when user starts typing
     if (error) {
       clearAuthError();
     }
@@ -44,14 +43,20 @@ const LoginForm = () => {
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit} aria-labelledby="login-form-title">
       <div className={styles.header}>
-        <h2 className={styles.title}>Welcome Back</h2>
-        <p className={styles.subtitle}>Sign in to your account to continue</p>
+        <img src="/logo.png" alt="" className={styles.logo} />
+        <h2 id="login-form-title" className={styles.title}>
+          Sign in to your workspace
+        </h2>
+        <p className={styles.subtitle}>
+          Use your organization username and password to access the research search
+          workspace.
+        </p>
       </div>
 
       {error && (
-        <div className={styles.error}>
+        <div className={styles.error} role="alert">
           <svg
             width="16"
             height="16"
@@ -59,6 +64,7 @@ const LoginForm = () => {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            aria-hidden
           >
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
@@ -81,6 +87,7 @@ const LoginForm = () => {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            aria-hidden
           >
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
@@ -92,7 +99,7 @@ const LoginForm = () => {
             value={formData.Username}
             onChange={handleChange}
             className={styles.input}
-            placeholder="Enter your username"
+            placeholder="Organization username"
             autoComplete="username"
             required
           />
@@ -112,6 +119,7 @@ const LoginForm = () => {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            aria-hidden
           >
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -123,7 +131,7 @@ const LoginForm = () => {
             value={formData.Password}
             onChange={handleChange}
             className={styles.input}
-            placeholder="Enter your password"
+            placeholder="Password"
             autoComplete="current-password"
             required
           />
@@ -141,6 +149,7 @@ const LoginForm = () => {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
+                aria-hidden
               >
                 <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                 <line x1="1" y1="1" x2="23" y2="23" />
@@ -153,6 +162,7 @@ const LoginForm = () => {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
+                aria-hidden
               >
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <circle cx="12" cy="12" r="3" />
@@ -165,7 +175,7 @@ const LoginForm = () => {
       <div className={styles.options}>
         <label className={styles.remember}>
           <input type="checkbox" />
-          <span className={styles.checkmark}></span>
+          <span className={styles.checkmark} />
           <span>Remember me</span>
         </label>
         <a href="#forgot" className={styles.forgotLink}>
@@ -182,7 +192,7 @@ const LoginForm = () => {
           <Loader size="small" variant="dots" />
         ) : (
           <>
-            <span>Sign In</span>
+            <span>Sign in</span>
             <svg
               width="18"
               height="18"
@@ -190,6 +200,7 @@ const LoginForm = () => {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
+              aria-hidden
             >
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
@@ -198,11 +209,8 @@ const LoginForm = () => {
         )}
       </button>
 
-      <p className={styles.signupText}>
-        Don&apos;t have an account?{" "}
-        <a href="#signup" className={styles.signupLink}>
-          Create one
-        </a>
+      <p className={styles.trustNote}>
+        Access is limited to authorized users from participating organizations.
       </p>
     </form>
   );

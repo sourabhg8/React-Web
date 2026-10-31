@@ -11,7 +11,7 @@
   color: var(--color-sidebar-text);
   background: var(--gradient-sidebar);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset -1px 0 0 rgba(74, 120, 173, 0.15);
+  box-shadow: inset -1px 0 0 rgba(69, 184, 131, 0.12);
   overflow: hidden;
   isolation: isolate;
 }
@@ -22,21 +22,21 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse 165% 125% at 0% 0%, rgba(74, 120, 173, 0.48) 0%, transparent 72%),
-    radial-gradient(ellipse 120% 95% at 15% 20%, rgba(58, 102, 158, 0.22) 0%, transparent 68%),
-    radial-gradient(ellipse 48% 38% at 100% 100%, rgba(69, 184, 131, 0.34) 0%, transparent 52%);
+    radial-gradient(ellipse 140% 110% at 0% 0%, rgba(74, 120, 173, 0.28) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 8% 12%, rgba(69, 184, 131, 0.2) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 45% at 100% 100%, rgba(69, 184, 131, 0.42) 0%, transparent 55%);
 }
 
 .sidebarOrbBlue {
   pointer-events: none;
   position: absolute;
   z-index: 0;
-  width: min(240px, 85%);
-  height: 200px;
-  top: -12%;
-  left: -28%;
+  width: min(180px, 70%);
+  height: 150px;
+  top: -8%;
+  left: -22%;
   border-radius: 50%;
-  background: rgba(74, 120, 173, 0.48);
+  background: rgba(74, 120, 173, 0.32);
   filter: blur(40px);
 }
 
@@ -44,12 +44,12 @@
   pointer-events: none;
   position: absolute;
   z-index: 0;
-  width: 96px;
-  height: 96px;
-  bottom: 0;
-  right: -20px;
+  width: 130px;
+  height: 130px;
+  bottom: -4%;
+  right: -24px;
   border-radius: 50%;
-  background: rgba(69, 184, 131, 0.32);
+  background: rgba(69, 184, 131, 0.4);
   filter: blur(40px);
 }
 

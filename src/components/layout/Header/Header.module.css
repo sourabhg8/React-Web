@@ -6,9 +6,13 @@
   right: 0;
   width: 100%;
   height: var(--header-height);
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.97) 0%,
+    rgba(246, 251, 248, 0.96) 100%
+  );
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(69, 184, 131, 0.14);
   z-index: var(--z-sticky);
   overflow: hidden;
 }
@@ -23,10 +27,11 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(69, 184, 131, 0.15) 20%,
-    rgba(69, 184, 131, 0.85) 45%,
-    rgba(74, 120, 173, 0.85) 55%,
-    rgba(74, 120, 173, 0.15) 80%,
+    rgba(69, 184, 131, 0.2) 18%,
+    rgba(69, 184, 131, 0.88) 42%,
+    rgba(69, 184, 131, 0.65) 58%,
+    rgba(74, 120, 173, 0.4) 68%,
+    rgba(74, 120, 173, 0.12) 82%,
     transparent 100%
   );
   background-size: 220% 100%;
@@ -100,8 +105,9 @@
   border-radius: inherit;
   background: linear-gradient(
     135deg,
-    rgba(69, 184, 131, 0.12) 0%,
-    rgba(74, 120, 173, 0.08) 100%
+    rgba(69, 184, 131, 0.16) 0%,
+    rgba(69, 184, 131, 0.06) 55%,
+    rgba(74, 120, 173, 0.05) 100%
   );
   opacity: 0;
   transition: opacity 0.35s ease;
@@ -132,7 +138,7 @@
 }
 
 .navLinkActive {
-  color: var(--color-secondary);
+  color: var(--color-primary-hover);
   font-weight: var(--font-weight-semibold);
 }
 

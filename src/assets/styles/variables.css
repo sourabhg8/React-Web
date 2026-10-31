@@ -63,10 +63,10 @@
   );
   --gradient-sidebar: linear-gradient(
     135deg,
-    #1e3a58 0%,
-    #1a314a 28%,
-    var(--color-brand-night) 62%,
-    #1e3d38 86%,
+    #1c3548 0%,
+    #1a2f36 30%,
+    var(--color-brand-night) 58%,
+    #256052 82%,
     #2d5c52 100%
   );
 

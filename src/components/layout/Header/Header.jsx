@@ -68,6 +68,15 @@ const Header = () => {
   };
 
   // Format role for display
+  const dashboardRoute = getDashboardRoute();
+
+  const navLinkClass = (route, { exact = false } = {}) => {
+    const active = exact
+      ? location.pathname === route
+      : location.pathname === route || location.pathname.startsWith(`${route}/`);
+    return [styles.navLink, active ? styles.navLinkActive : ""].filter(Boolean).join(" ");
+  };
+
   const getDisplayRole = () => {
     if (!user?.role) return "";
     switch (user.role) {
@@ -91,19 +100,19 @@ const Header = () => {
           <img src="/logo.png" alt="TehriHills" className={styles.logoImg} />
         </Link>
 
-        <nav className={styles.nav}>
-          <Link to={ROUTES.HOME} className={styles.navLink}>
+        <nav className={styles.nav} aria-label="Main">
+          <Link to={ROUTES.HOME} className={navLinkClass(ROUTES.HOME, { exact: true })}>
             Home
           </Link>
 
-          {isAuthenticated && (user?.role === ROLES.ORG_USER || user?.role === "org_user") && (
-            <Link to={ROUTES.SEARCH} className={styles.navLink}>
+          {isAuthenticated && isOrgUser && (
+            <Link to={ROUTES.SEARCH} className={navLinkClass(ROUTES.SEARCH)}>
               Research workspace
             </Link>
           )}
 
-          {isAuthenticated && user?.role !== ROLES.ORG_USER && user?.role !== "org_user" && (
-            <Link to={getDashboardRoute()} className={styles.navLink}>
+          {isAuthenticated && !isOrgUser && (
+            <Link to={dashboardRoute} className={navLinkClass(dashboardRoute)}>
               Dashboard
             </Link>
           )}

@@ -684,52 +684,29 @@ const Home = () => {
         <div className={styles.heroOverlay} aria-hidden />
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <span className={styles.badge}>
-              <span className={styles.badgeDot} />
-              Medical research intelligence platform
-            </span>
+            <p className={styles.badge}>Medical research intelligence</p>
 
             <h1 className={styles.heroTitle}>
-              <span className={styles.heroTitleLead}>AI-powered search across</span>
-              <span className={`${styles.gradientText} ${styles.heroTitleAccent}`}>
-                indexed medical literature
-              </span>
+              AI-powered search across{' '}
+              <span className={styles.heroTitleAccent}>indexed medical literature</span>
             </h1>
 
             <p className={styles.heroSubtitle}>
-              Hybrid search and relevance-ranked results from PubMed, PMC, and curated sources —
-              with AI summaries grounded in the evidence.
+              PubMed, PMC, and curated sources with hybrid search, ranked results, and
+              evidence-grounded AI summaries.
             </p>
 
-            <div className={styles.heroCtaBlock}>
-              <div className={styles.heroCta}>
-                <button type="button" className={styles.primaryBtn} onClick={handlePrimaryCta}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.35-4.35" />
-                  </svg>
-                  {canSearch ? "Open research workspace" : "Get started"}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </button>
-                <button type="button" className={styles.secondaryBtn} onClick={() => scrollTo("how-it-works")}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                  See how it works
-                </button>
-              </div>
-              {!canSearch && (
-                <p className={styles.heroCtaNote}>Sign in with your organization account</p>
-              )}
-              <ul className={styles.heroTrust} aria-label="Sources and capabilities">
-                <li className={styles.heroTrustItem}>PubMed &amp; PMC</li>
-                <li className={styles.heroTrustItem}>Hybrid search</li>
-                <li className={styles.heroTrustItem}>Evidence-grounded summaries</li>
-              </ul>
+            <div className={styles.heroCta}>
+              <button type="button" className={styles.primaryBtn} onClick={handlePrimaryCta}>
+                {canSearch ? "Open research workspace" : "Get started"}
+              </button>
+              <button type="button" className={styles.secondaryBtn} onClick={() => scrollTo("how-it-works")}>
+                See how it works
+              </button>
             </div>
+            {!canSearch && (
+              <p className={styles.heroCtaNote}>Sign in with your organization account</p>
+            )}
           </div>
         </div>
       </section>
@@ -762,17 +739,7 @@ const Home = () => {
               ))}
             </div>
 
-            <div className={styles.platformBridge} aria-hidden>
-              <span className={styles.platformBridgeLine} />
-              <span className={styles.platformBridgePill}>
-                <span className={styles.platformBridgeDot} />
-                Platform impact
-              </span>
-              <span className={styles.platformBridgeLine} />
-            </div>
-
             <div className={styles.statsBand} aria-label="Platform at a glance">
-              <div className={styles.statsBandGlow} aria-hidden />
               {STATS.map((stat) => (
                 <div
                   key={stat.label}
@@ -787,17 +754,7 @@ const Home = () => {
               ))}
             </div>
 
-            <div className={styles.platformBridge} aria-hidden>
-              <span className={styles.platformBridgeLine} />
-              <span className={styles.platformBridgePill}>
-                <span className={styles.platformBridgeDot} />
-                Indexed corpora
-              </span>
-              <span className={styles.platformBridgeLine} />
-            </div>
-
             <div className={styles.sourcesBlock}>
-              <div className={styles.sourcesMesh} aria-hidden />
               <div className={styles.sourcesIntro}>
                 <h3 className={styles.sourcesHeading}>Search across leading sources</h3>
                 <p className={styles.sourcesSub}>
@@ -826,17 +783,8 @@ const Home = () => {
       </section>
 
       <section className={styles.accredited} id="accredited">
-        <div className={styles.accreditedAmbient} aria-hidden />
         <div className={styles.sectionContainer}>
           <header className={styles.accreditedHeader}>
-            <div className={styles.accreditedBridge}>
-              <span className={styles.accreditedBridgeLine} />
-              <span className={styles.accreditedBridgePill}>
-                <span className={styles.accreditedBridgeDot} />
-                Trust & compliance
-              </span>
-              <span className={styles.accreditedBridgeLine} />
-            </div>
             <h2 className={styles.accreditedHeading}>Accredited by</h2>
             <p className={styles.accreditedLead}>
               Independent recognition for security, privacy, and professional standards.
@@ -844,7 +792,6 @@ const Home = () => {
           </header>
 
           <div className={styles.accreditedCard}>
-            <div className={styles.accreditedCardSheen} aria-hidden />
             <div className={styles.accreditedGrid}>
               {ACCREDITATION.map((item) => (
                 <figure
@@ -877,17 +824,9 @@ const Home = () => {
       </section>
 
       <section className={styles.workflow} id="how-it-works" aria-labelledby="workflow-heading">
-        <div className={styles.workflowGlow} aria-hidden />
         <div className={styles.sectionContainer}>
           <header className={styles.workflowHeader}>
-            <div className={styles.workflowBridge}>
-              <span className={styles.workflowBridgeLine} />
-              <span className={styles.workflowBridgePill}>
-                <span className={styles.workflowBridgeDot} />
-                How it works
-              </span>
-              <span className={styles.workflowBridgeLine} />
-            </div>
+            <p className={styles.workflowEyebrow}>How it works</p>
             <h2 className={styles.workflowHeading} id="workflow-heading">
               From question to evidence
             </h2>
@@ -899,10 +838,7 @@ const Home = () => {
 
           <div className={styles.workflowCard}>
             <div className={styles.workflowRailBar} aria-hidden>
-              <div className={styles.workflowRailTrack}>
-                <span className={`${styles.workflowRailDot} ${styles.workflowRailDot_accessToSearch}`} />
-                <span className={`${styles.workflowRailDot} ${styles.workflowRailDot_searchToResults}`} />
-              </div>
+              <span className={styles.workflowRailTrack} />
               {WORKFLOW_STEPS.map((item) => (
                 <div key={item.id} className={styles.workflowRailCol}>
                   <div

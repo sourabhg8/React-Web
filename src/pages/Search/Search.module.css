@@ -6,7 +6,7 @@
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  background: linear-gradient(165deg, #f4f8fc 0%, #eef3f1 42%, #f6f8fa 100%);
+  background: var(--bg-secondary);
 }
 
 .sidebarWrap {
@@ -67,8 +67,8 @@
 
 .tabActive {
   border-color: var(--color-primary);
-  background: var(--gradient-subtle);
-  box-shadow: var(--shadow-md);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
 }
 
 .tabTitle {
@@ -95,9 +95,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-2xl);
-  box-shadow:
-    0 1px 2px rgba(26, 36, 51, 0.04),
-    0 8px 24px rgba(26, 36, 51, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .searchWrapper:focus-within {

@@ -14,7 +14,7 @@
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(69, 184, 131, 0.14);
   z-index: var(--z-sticky);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .header::after {
@@ -190,6 +190,16 @@
 /* User Menu with Dropdown */
 .userMenuWrapper {
   position: relative;
+  z-index: 2;
+}
+
+.userMenuWrapper::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 10px;
 }
 
 .userIconBtn {
@@ -227,7 +237,7 @@
   visibility: hidden;
   transform: translateY(-10px);
   transition: all var(--transition-fast);
-  z-index: var(--z-dropdown);
+  z-index: var(--z-popover);
 }
 
 .userMenuWrapper:hover .userDropdown {

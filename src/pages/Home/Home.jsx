@@ -214,11 +214,35 @@ const WORKFLOW_STEPS = [
 
 const ACCREDITATION = [
   {
+    src: "/accreditation/scientist-com.png",
+    alt: "Scientist.com registered supplier",
+    label: "Scientist.com",
+    detail: "Registered supplier",
+    tone: "blue",
+    darkPlate: true,
+  },
+  {
+    src: "/accreditation/ephmra.png",
+    alt: "EPHMRA Agency Member",
+    label: "EPHMRA",
+    detail: "Pharmaceutical market research",
+    tone: "amber",
+  },
+  {
     src: "/accreditation/hipaa.png",
     alt: "HIPAA Compliant",
-    label: "HIPAA compliant",
+    label: "HIPAA",
     detail: "Healthcare data safeguards",
     tone: "green",
+  },
+  {
+    src: "/accreditation/iso-9001-27001.png",
+    alt: "ISO 9001:2015 and ISO 27001:2013 certified",
+    label: "ISO 9001-27001",
+    detail: "Quality & information security",
+    tone: "blue",
+    darkPlate: true,
+    wideLogo: true,
   },
   {
     src: "/accreditation/gdpr.png",
@@ -226,14 +250,6 @@ const ACCREDITATION = [
     label: "EU GDPR",
     detail: "Privacy & data protection",
     tone: "blue",
-  },
-  {
-    src: "/accreditation/ephmra.png",
-    alt: "EPHMRA Agency Member",
-    label: "EPHMRA member",
-    detail: "Pharmaceutical market research",
-    tone: "amber",
-    wide: true,
   },
 ];
 
@@ -795,20 +811,31 @@ const Home = () => {
             <div className={styles.accreditedGrid}>
               {ACCREDITATION.map((item) => (
                 <figure
-                  key={item.alt}
+                  key={item.label}
                   className={[
                     styles.accreditedItem,
-                    item.wide ? styles.accreditedItemWide : "",
                     styles[`accreditedItem_${item.tone}`],
                   ]
                     .filter(Boolean)
                     .join(" ")}
                 >
-                  <div className={styles.accreditedLogoPlate}>
+                  <div
+                    className={[
+                      styles.accreditedLogoPlate,
+                      item.darkPlate ? styles.accreditedLogoPlate_dark : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
                     <img
                       src={item.src}
                       alt={item.alt}
-                      className={styles.accreditedLogo}
+                      className={[
+                        styles.accreditedLogo,
+                        item.wideLogo ? styles.accreditedLogo_wide : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                       loading="lazy"
                     />
                   </div>

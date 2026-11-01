@@ -1058,7 +1058,7 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--spacing-md);
 }
 
@@ -1158,9 +1158,23 @@
   transform: scale(1.03);
 }
 
-.accreditedItemWide .accreditedLogo {
+.accreditedLogoPlate_dark {
+  background: #12151a;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 16px rgba(26, 36, 51, 0.12);
+}
+
+.accreditedItem:hover .accreditedLogoPlate_dark {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 24px var(--acc-plate-glow);
+}
+
+.accreditedLogo_wide {
   max-height: 72px;
-  max-width: min(240px, 100%);
+  max-width: min(260px, 100%);
 }
 
 .accreditedCaption {
@@ -2054,11 +2068,21 @@
   }
 }
 
+@media (max-width: 1280px) {
+  .accreditedGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1024px) {
   .featuresGrid,
   .statsBand,
   .sourcesGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .accreditedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .featureCard:nth-child(2n)::after {
@@ -2210,7 +2234,7 @@
     max-height: 56px;
   }
 
-  .accreditedItemWide .accreditedLogo {
+  .accreditedLogo_wide {
     max-height: 64px;
   }
 }

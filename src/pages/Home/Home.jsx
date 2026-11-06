@@ -25,7 +25,7 @@ const FEATURES = [
   {
     title: "Comprehensive Coverage",
     description:
-      "Search across millions of indexed medical literature chunks from PubMed, PMC, Google Patents and curated sources.",
+      "Search across millions of indexed medical literature chunks from PubMed (PMC), Clinical Trials, Google Patents, and curated sources.",
     tone: "green",
     index: "01",
     icon: (
@@ -192,9 +192,8 @@ const STATS = [
 ];
 
 const LEADING_SOURCES = [
-  { name: "PubMed", abbr: "PM", tone: "teal" },
-  { name: "PMC", abbr: "PMC", tone: "blue" },
-  { name: "ClinicalTrials.gov", abbr: "CT", tone: "violet" },
+  { name: "PubMed (PMC)", abbr: "PM", tone: "teal" },
+  { name: "Clinical Trials", abbr: "CT", tone: "violet" },
   { name: "Google Patents", abbr: "GP", tone: "amber" },
 ];
 
@@ -218,7 +217,7 @@ const WORKFLOW_STEPS = [
     phase: "Discover",
     title: "Search indexed literature",
     description:
-      "Query by topic, filter by source and year, and explore ranked passages from PubMed, PMC, and more.",
+      "Query by topic, filter by source and year, and explore ranked passages from PubMed (PMC), Clinical Trials, Google Patents, and more.",
     tone: "green",
     icon: (
       <svg {...iconProps}>
@@ -763,8 +762,8 @@ const Home = () => {
             </h1>
 
             <p className={styles.heroSubtitle}>
-              PubMed, PMC, and Google Patents with hybrid search, ranked
-              results, and evidence-grounded AI summaries.
+              PubMed (PMC), Clinical Trials, and Google Patents with hybrid
+              search, ranked results, and evidence-grounded AI summaries.
             </p>
 
             <div className={styles.heroCta}>
@@ -1012,7 +1011,7 @@ const Home = () => {
                 </div>
                 <div className={styles.workflowPreviewActions}>
                   <span className={styles.workflowPreviewFilters}>
-                    <span>PubMed</span>
+                    <span>PubMed (PMC)</span>
                     <span>2020–2026</span>
                   </span>
                 </div>

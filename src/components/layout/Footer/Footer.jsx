@@ -110,7 +110,7 @@ const Footer = () => {
           <div className={styles.bottom}>
             <p className={styles.copyright}>© {currentYear} TehriHills. All rights reserved.</p>
             <a href="/#accredited" className={styles.bottomLink}>
-              HIPAA · GDPR · EPHMRA
+              HIPAA · GDPR · EPHMRA · Scientist.com
             </a>
           </div>
         </div>

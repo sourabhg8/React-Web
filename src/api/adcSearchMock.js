@@ -263,6 +263,16 @@ function buildFacetCounts(records) {
     const n = records.filter((r) => r.sourceType === type).length;
     if (n > 0) counts[`sourceType:${type}`] = n;
   });
+  const statusByValue = {};
+  records.forEach((r) => {
+    const s = r.details?.drugStatus;
+    if (s) {
+      statusByValue[s] = (statusByValue[s] || 0) + 1;
+    }
+  });
+  Object.entries(statusByValue).forEach(([value, n]) => {
+    if (n > 0) counts[`drugStatus:${value}`] = n;
+  });
   return counts;
 }
 
@@ -286,6 +296,15 @@ export async function mockAdcSearch({
   if (sourceFilter.length > 0) {
     const allowed = new Set(sourceFilter.map((s) => s.toLowerCase()));
     matched = matched.filter((r) => allowed.has(r.sourceType.toLowerCase()));
+  }
+
+  const drugStatusFilter = filters.drugStatus ?? filters.DrugStatus ?? [];
+  if (Array.isArray(drugStatusFilter) && drugStatusFilter.length > 0) {
+    const allowed = new Set(drugStatusFilter.map((s) => String(s)));
+    matched = matched.filter((r) => {
+      const s = r.details?.drugStatus;
+      return s && allowed.has(String(s));
+    });
   }
 
   const totalResults = matched.length;

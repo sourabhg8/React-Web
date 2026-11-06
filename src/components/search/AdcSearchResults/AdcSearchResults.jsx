@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { formatRelevancePercent } from '../../../utils/formatRelevance';
 import { AdcSourceIcon, getAdcSourceMeta } from './adcSourceIcons';
 import styles from './AdcSearchResults.module.css';
 
 const ALL_SOURCES = 'All';
+const DRUG_STATUS_FACET = 'drugStatus';
+const DRUG_STATUS_LABEL = 'Drug status';
 
 /** Order and labels for expanded row details (matches API AdcSearchDetailsDto). */
 const ADC_DETAIL_FIELDS = [
@@ -57,12 +59,38 @@ function parseSourceFacets(facetCounts, totalResults) {
   return counts;
 }
 
+function parseDrugStatusFacets(facetCounts) {
+  const out = {};
+  if (!facetCounts) return out;
+  const prefix = `${DRUG_STATUS_FACET}:`;
+  for (const [key, count] of Object.entries(facetCounts)) {
+    if (key.startsWith(prefix)) {
+      out[key.slice(prefix.length)] = count;
+    }
+  }
+  return out;
+}
+
+/** Options for the dropdown: union of facet values and currently selected (same idea as source tabs). */
+function buildDrugStatusOptions(counts, selected) {
+  const values = new Set([...Object.keys(counts), ...selected]);
+  return Array.from(values)
+    .filter((v) => v !== '')
+    .map((value) => ({
+      value,
+      count: counts[value] ?? 0,
+    }))
+    .sort((a, b) => a.value.localeCompare(b.value, undefined, { sensitivity: 'base' }));
+}
+
 const AdcSearchResults = ({
   searchResponse,
   isLoading,
   error,
   selectedSource,
   onSourceFilter,
+  selectedDrugStatuses = [],
+  onDrugStatusFilter,
   onPageChange,
 }) => {
   const [expandedId, setExpandedId] = useState(null);
@@ -73,6 +101,13 @@ const AdcSearchResults = ({
   const sourceCounts = useMemo(
     () => parseSourceFacets(facetCounts, totalResults),
     [facetCounts, totalResults]
+  );
+
+  const drugStatusCounts = useMemo(() => parseDrugStatusFacets(facetCounts), [facetCounts]);
+
+  const drugStatusOptions = useMemo(
+    () => buildDrugStatusOptions(drugStatusCounts, selectedDrugStatuses),
+    [drugStatusCounts, selectedDrugStatuses]
   );
 
   const sourceTabs = useMemo(() => {
@@ -124,14 +159,27 @@ const AdcSearchResults = ({
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
+  const drugStatusBreadcrumbs = selectedDrugStatuses.map((value) => ({
+    value,
+    label: value,
+  }));
+
+  const filtersToolbar = (
+    <div className={styles.filtersToolbar}>
+      <SourceTabs tabs={sourceTabs} selected={selectedSource} onSelect={onSourceFilter} />
+      <DrugStatusFilter
+        options={drugStatusOptions}
+        selected={selectedDrugStatuses}
+        onChange={onDrugStatusFilter}
+      />
+    </div>
+  );
+
   if (results.length === 0 && totalResults === 0) {
     return (
       <div className={styles.wrapper}>
-        <SourceTabs
-          tabs={sourceTabs}
-          selected={selectedSource}
-          onSelect={onSourceFilter}
-        />
+        {filtersToolbar}
+        <DrugStatusBreadcrumbs items={drugStatusBreadcrumbs} onRemove={onDrugStatusFilter} />
         <div className={styles.stateBox}>
           <p>No ADC results for &quot;{sanitizedQuery}&quot;</p>
         </div>
@@ -141,7 +189,8 @@ const AdcSearchResults = ({
 
   return (
     <div className={styles.wrapper}>
-      <SourceTabs tabs={sourceTabs} selected={selectedSource} onSelect={onSourceFilter} />
+      {filtersToolbar}
+      <DrugStatusBreadcrumbs items={drugStatusBreadcrumbs} onRemove={onDrugStatusFilter} />
 
       <div className={styles.resultsHeader}>
         <h2 className={styles.resultsTitle}>
@@ -289,6 +338,97 @@ function SourceTabs({ tabs, selected, onSelect }) {
           Clear
         </button>
       )}
+    </div>
+  );
+}
+
+function DrugStatusFilter({ options, selected, onChange }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const handle = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [open]);
+
+  const toggleValue = (value) => {
+    const isOn = selected.includes(value);
+    const next = isOn ? selected.filter((v) => v !== value) : [...selected, value];
+    onChange?.(next);
+  };
+
+  const label =
+    selected.length === 0 ? DRUG_STATUS_LABEL : `${DRUG_STATUS_LABEL} (${selected.length})`;
+
+  if (options.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={styles.drugStatusFilter} ref={rootRef}>
+      <button
+        type="button"
+        className={styles.drugStatusTrigger}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        onClick={() => setOpen((o) => !o)}
+      >
+        {label}
+        <span className={styles.drugStatusChevron} aria-hidden>
+          ▾
+        </span>
+      </button>
+      {open && (
+        <ul className={styles.drugStatusPanel} role="listbox" aria-multiselectable="true">
+          {options.map(({ value, count }) => {
+            const isSelected = selected.includes(value);
+            return (
+              <li key={value} role="presentation">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  className={styles.drugStatusOption}
+                  onClick={() => toggleValue(value)}
+                >
+                  <span className={`${styles.drugStatusTick} ${isSelected ? styles.drugStatusTickOn : ''}`} aria-hidden>
+                    ✓
+                  </span>
+                  <span className={styles.drugStatusOptionLabel}>{value}</span>
+                  <span className={styles.drugStatusOptionCount}>{count}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function DrugStatusBreadcrumbs({ items, onRemove }) {
+  if (!items?.length) return null;
+  return (
+    <div className={styles.filterBreadcrumbs} aria-label="Drug status filters">
+      {items.map(({ value, label }) => (
+        <button
+          key={value}
+          type="button"
+          className={styles.filterCrumb}
+          onClick={() => onRemove?.(items.filter((i) => i.value !== value).map((i) => i.value))}
+        >
+          <span className={styles.filterCrumbLabel}>{label}</span>
+          <span className={styles.filterCrumbRemove} aria-hidden>
+            ×
+          </span>
+        </button>
+      ))}
     </div>
   );
 }

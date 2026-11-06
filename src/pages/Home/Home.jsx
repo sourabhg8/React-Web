@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { openLoginModal } from "../../store/slices/uiSlice";
-import { selectIsAuthenticated, selectUser } from "../../store/slices/authSlice";
+import {
+  selectIsAuthenticated,
+  selectUser,
+} from "../../store/slices/authSlice";
 import { ROUTES, ROLES } from "../../utils/constants";
 import styles from "./Home.module.css";
 
@@ -22,7 +25,7 @@ const FEATURES = [
   {
     title: "Comprehensive Coverage",
     description:
-      "Search across millions of indexed medical literature chunks from PubMed, PMC, and curated sources.",
+      "Search across millions of indexed medical literature chunks from PubMed, PMC, Google Patents and curated sources.",
     tone: "green",
     index: "01",
     icon: (
@@ -117,7 +120,14 @@ const STATS = [
     label: "Indexed chunks",
     accent: "green",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
       </svg>
@@ -128,7 +138,14 @@ const STATS = [
     label: "Medical sources",
     accent: "blue",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <ellipse cx="12" cy="5" rx="9" ry="3" />
         <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
         <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
@@ -140,7 +157,14 @@ const STATS = [
     label: "Powered search",
     accent: "violet",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
       </svg>
     ),
@@ -150,7 +174,14 @@ const STATS = [
     label: "By research teams",
     accent: "amber",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -164,7 +195,7 @@ const LEADING_SOURCES = [
   { name: "PubMed", abbr: "PM", tone: "teal" },
   { name: "PMC", abbr: "PMC", tone: "blue" },
   { name: "ClinicalTrials.gov", abbr: "CT", tone: "violet" },
-  { name: "Curated Sources", abbr: "CS", tone: "amber" },
+  { name: "Google Patents", abbr: "GP", tone: "amber" },
 ];
 
 const WORKFLOW_STEPS = [
@@ -219,7 +250,7 @@ const ACCREDITATION = [
     label: "Scientist.com",
     detail: "Registered supplier",
     tone: "blue",
-    darkPlate: true,
+    darkPlate: false,
   },
   {
     src: "/accreditation/ephmra.png",
@@ -241,7 +272,7 @@ const ACCREDITATION = [
     label: "ISO 9001-27001",
     detail: "Quality & information security",
     tone: "blue",
-    darkPlate: true,
+    darkPlate: false,
     wideLogo: true,
   },
   {
@@ -271,7 +302,9 @@ const WorkflowSecureAccessDemo = () => {
   const [focusedField, setFocusedField] = useState("username");
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reducedMotion) {
       setPhase("unlocked");
       setUsernameLength(WORKFLOW_DEMO_USERNAME.length);
@@ -366,7 +399,9 @@ const WorkflowSecureAccessDemo = () => {
 
       <div className={styles.workflowPreviewMain}>
         {isUnlocked ? (
-          <div className={`${styles.workflowAccessField} ${styles.workflowAccessField_unlocked}`}>
+          <div
+            className={`${styles.workflowAccessField} ${styles.workflowAccessField_unlocked}`}
+          >
             <span className={styles.workflowAccessGranted}>
               Signed in as {WORKFLOW_DEMO_USERNAME}
             </span>
@@ -379,7 +414,9 @@ const WorkflowSecureAccessDemo = () => {
                 className={[
                   styles.workflowAccessField,
                   styles.workflowAccessField_username,
-                  focusedField === "username" ? styles.workflowAccessField_focus : "",
+                  focusedField === "username"
+                    ? styles.workflowAccessField_focus
+                    : "",
                   isSigning ? styles.workflowAccessField_busy : "",
                 ]
                   .filter(Boolean)
@@ -397,7 +434,9 @@ const WorkflowSecureAccessDemo = () => {
                 className={[
                   styles.workflowAccessField,
                   styles.workflowAccessField_password,
-                  focusedField === "password" ? styles.workflowAccessField_focus : "",
+                  focusedField === "password"
+                    ? styles.workflowAccessField_focus
+                    : "",
                   isSigning ? styles.workflowAccessField_busy : "",
                 ]
                   .filter(Boolean)
@@ -460,7 +499,9 @@ const WorkflowQueryTyping = ({ text, className, caretClassName }) => {
   const [visibleLength, setVisibleLength] = useState(0);
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reducedMotion) {
       setVisibleLength(text.length);
       return undefined;
@@ -511,7 +552,9 @@ const WorkflowInsightDemo = () => {
   const [visibleResults, setVisibleResults] = useState(0);
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reducedMotion) {
       setPhase("results");
       setSummaryLength(WORKFLOW_AI_SUMMARY.length);
@@ -619,7 +662,9 @@ const WorkflowInsightDemo = () => {
               <span className={styles.workflowInsightAiTag}>AI</span>
               <p className={styles.workflowInsightSummaryText}>
                 {WORKFLOW_AI_SUMMARY.slice(0, summaryLength)}
-                {isSummary && <span className={styles.workflowPreviewCaret} aria-hidden />}
+                {isSummary && (
+                  <span className={styles.workflowPreviewCaret} aria-hidden />
+                )}
               </p>
             </>
           )}
@@ -627,7 +672,9 @@ const WorkflowInsightDemo = () => {
 
         <div className={styles.workflowInsightResultsWrap}>
           <span className={styles.workflowInsightResultsLabel}>
-            {isGenerating || isSummary ? "Preparing ranked passages…" : "Ranked by relevance"}
+            {isGenerating || isSummary
+              ? "Preparing ranked passages…"
+              : "Ranked by relevance"}
           </span>
           <ul className={styles.workflowInsightResults}>
             {WORKFLOW_RANKED_RESULTS.map((item, index) => (
@@ -635,14 +682,20 @@ const WorkflowInsightDemo = () => {
                 key={item.title}
                 className={[
                   styles.workflowInsightResult,
-                  index < visibleResults ? styles.workflowInsightResult_visible : "",
+                  index < visibleResults
+                    ? styles.workflowInsightResult_visible
+                    : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
               >
                 <span className={styles.workflowInsightRank}>{index + 1}</span>
-                <span className={styles.workflowInsightTitle}>{item.title}</span>
-                <span className={styles.workflowInsightScore}>{item.relevance}%</span>
+                <span className={styles.workflowInsightTitle}>
+                  {item.title}
+                </span>
+                <span className={styles.workflowInsightScore}>
+                  {item.relevance}%
+                </span>
               </li>
             ))}
           </ul>
@@ -703,25 +756,37 @@ const Home = () => {
             <p className={styles.badge}>Medical research intelligence</p>
 
             <h1 className={styles.heroTitle}>
-              AI-powered search across{' '}
-              <span className={styles.heroTitleAccent}>indexed medical literature</span>
+              AI-powered search across{" "}
+              <span className={styles.heroTitleAccent}>
+                indexed medical literature
+              </span>
             </h1>
 
             <p className={styles.heroSubtitle}>
-              PubMed, PMC, and curated sources with hybrid search, ranked results, and
-              evidence-grounded AI summaries.
+              PubMed, PMC, and Google Patents with hybrid search, ranked
+              results, and evidence-grounded AI summaries.
             </p>
 
             <div className={styles.heroCta}>
-              <button type="button" className={styles.primaryBtn} onClick={handlePrimaryCta}>
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={handlePrimaryCta}
+              >
                 {canSearch ? "Open research workspace" : "Get started"}
               </button>
-              <button type="button" className={styles.secondaryBtn} onClick={() => scrollTo("how-it-works")}>
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={() => scrollTo("how-it-works")}
+              >
                 See how it works
               </button>
             </div>
             {!canSearch && (
-              <p className={styles.heroCtaNote}>Sign in with your organization account</p>
+              <p className={styles.heroCtaNote}>
+                Sign in with your organization account
+              </p>
             )}
           </div>
         </div>
@@ -730,7 +795,9 @@ const Home = () => {
       <section className={styles.platform} id="features">
         <div className={styles.sectionContainer}>
           <header className={styles.platformHeader}>
-            <h2 className={styles.platformHeading}>Built for rigorous medical research</h2>
+            <h2 className={styles.platformHeading}>
+              Built for rigorous medical research
+            </h2>
             <p className={styles.platformLead}>
               Hybrid search, ranked evidence, and AI summaries in one workspace.
             </p>
@@ -746,7 +813,9 @@ const Home = () => {
                   <span className={styles.featureIndex} aria-hidden>
                     {feature.index}
                   </span>
-                  <div className={`${styles.featureIcon} ${styles[`featureIcon_${feature.tone}`]}`}>
+                  <div
+                    className={`${styles.featureIcon} ${styles[`featureIcon_${feature.tone}`]}`}
+                  >
                     {feature.icon}
                   </div>
                   <h3 className={styles.featureTitle}>{feature.title}</h3>
@@ -772,9 +841,12 @@ const Home = () => {
 
             <div className={styles.sourcesBlock}>
               <div className={styles.sourcesIntro}>
-                <h3 className={styles.sourcesHeading}>Search across leading sources</h3>
+                <h3 className={styles.sourcesHeading}>
+                  Search across leading sources
+                </h3>
                 <p className={styles.sourcesSub}>
-                  Unified hybrid search over peer-reviewed and curated medical indexes.
+                  Unified hybrid search over peer-reviewed and curated medical
+                  indexes.
                 </p>
               </div>
               <div className={styles.sourcesGrid}>
@@ -803,7 +875,8 @@ const Home = () => {
           <header className={styles.accreditedHeader}>
             <h2 className={styles.accreditedHeading}>Accredited by</h2>
             <p className={styles.accreditedLead}>
-              Independent recognition for security, privacy, and professional standards.
+              Independent recognition for security, privacy, and professional
+              standards.
             </p>
           </header>
 
@@ -841,7 +914,9 @@ const Home = () => {
                   </div>
                   <figcaption className={styles.accreditedCaption}>
                     <span className={styles.accreditedLabel}>{item.label}</span>
-                    <span className={styles.accreditedDetail}>{item.detail}</span>
+                    <span className={styles.accreditedDetail}>
+                      {item.detail}
+                    </span>
                   </figcaption>
                 </figure>
               ))}
@@ -850,7 +925,11 @@ const Home = () => {
         </div>
       </section>
 
-      <section className={styles.workflow} id="how-it-works" aria-labelledby="workflow-heading">
+      <section
+        className={styles.workflow}
+        id="how-it-works"
+        aria-labelledby="workflow-heading"
+      >
         <div className={styles.sectionContainer}>
           <header className={styles.workflowHeader}>
             <p className={styles.workflowEyebrow}>How it works</p>
@@ -858,16 +937,20 @@ const Home = () => {
               From question to evidence
             </h2>
             <p className={styles.workflowLead}>
-              Three connected stages — secure access, intelligent search, and traceable answers backed
-              by source literature.
+              Three connected stages — secure access, intelligent search, and
+              traceable answers backed by source literature.
             </p>
           </header>
 
           <div className={styles.workflowCard}>
             <div className={styles.workflowRailBar} aria-hidden>
               <div className={styles.workflowRailTrack}>
-                <span className={`${styles.workflowRailDot} ${styles.workflowRailDot_accessToSearch}`} />
-                <span className={`${styles.workflowRailDot} ${styles.workflowRailDot_searchToResults}`} />
+                <span
+                  className={`${styles.workflowRailDot} ${styles.workflowRailDot_accessToSearch}`}
+                />
+                <span
+                  className={`${styles.workflowRailDot} ${styles.workflowRailDot_searchToResults}`}
+                />
               </div>
               {WORKFLOW_STEPS.map((item) => (
                 <div key={item.id} className={styles.workflowRailCol}>
@@ -888,7 +971,9 @@ const Home = () => {
                   >
                     <span className={styles.workflowPhase}>{item.phase}</span>
                     <h3 className={styles.workflowStageTitle}>{item.title}</h3>
-                    <p className={styles.workflowStageDesc}>{item.description}</p>
+                    <p className={styles.workflowStageDesc}>
+                      {item.description}
+                    </p>
                   </article>
                 </li>
               ))}
@@ -932,7 +1017,9 @@ const Home = () => {
                   </span>
                 </div>
                 <div className={styles.workflowPreviewFoot}>
-                  <span className={styles.workflowPreviewChip}>Hybrid · ranked</span>
+                  <span className={styles.workflowPreviewChip}>
+                    Hybrid · ranked
+                  </span>
                 </div>
               </div>
               <div

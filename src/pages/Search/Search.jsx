@@ -84,6 +84,7 @@ const Search = () => {
   const [adcError, setAdcError] = useState(null);
   const [adcHasSearched, setAdcHasSearched] = useState(false);
   const [adcSourceFilter, setAdcSourceFilter] = useState(ADC_ALL_SOURCES);
+  const [adcDrugStatusFilter, setAdcDrugStatusFilter] = useState([]);
   const [adcPeakRelevanceScore, setAdcPeakRelevanceScore] = useState(null);
 
   const [researchResponse, setResearchResponse] = useState(null);
@@ -131,7 +132,23 @@ const Search = () => {
     };
   }, [loadSavedSearches]);
 
-  const runAdcSearch = useCallback(async (query, page = 1, sourceFilter = adcSourceFilter) => {
+  const buildAdcFilters = useCallback((sourceFilter, drugStatuses) => {
+    const filters = {};
+    if (sourceFilter && sourceFilter !== ADC_ALL_SOURCES) {
+      filters.sourceType = [sourceFilter];
+    }
+    if (drugStatuses?.length) {
+      filters.drugStatus = [...drugStatuses];
+    }
+    return filters;
+  }, []);
+
+  const runAdcSearch = useCallback(async (
+    query,
+    page = 1,
+    sourceFilter = adcSourceFilter,
+    drugStatuses = adcDrugStatusFilter,
+  ) => {
     if (!query.trim()) {
       setAdcError('Please enter a search term');
       return;
@@ -143,10 +160,7 @@ const Search = () => {
     setSaveMessage(null);
 
     try {
-      const filters =
-        sourceFilter && sourceFilter !== ADC_ALL_SOURCES
-          ? { sourceType: [sourceFilter] }
-          : {};
+      const filters = buildAdcFilters(sourceFilter, drugStatuses);
 
       const pageNum = Math.max(1, Number.parseInt(String(page), 10) || 1);
       const payload = {
@@ -175,7 +189,7 @@ const Search = () => {
     } finally {
       setAdcLoading(false);
     }
-  }, [adcSourceFilter, adcPeakRelevanceScore]);
+  }, [adcSourceFilter, adcDrugStatusFilter, adcPeakRelevanceScore, buildAdcFilters]);
 
   const runResearchSearch = useCallback(async (query, page = 1, filters = researchFilters) => {
     if (!query.trim()) {
@@ -225,7 +239,8 @@ const Search = () => {
     setSavedSearchLastSearchedAt(null);
     if (activeTab === TAB.ADC) {
       setAdcSourceFilter(ADC_ALL_SOURCES);
-      runAdcSearch(searchQuery, 1, ADC_ALL_SOURCES);
+      setAdcDrugStatusFilter([]);
+      runAdcSearch(searchQuery, 1, ADC_ALL_SOURCES, []);
     } else {
       setResearchFilters({});
       runResearchSearch(searchQuery, 1, {});
@@ -243,6 +258,7 @@ const Search = () => {
       setAdcError(null);
       setAdcHasSearched(false);
       setAdcSourceFilter(ADC_ALL_SOURCES);
+      setAdcDrugStatusFilter([]);
     } else {
       setResearchResponse(null);
       setResearchError(null);
@@ -259,7 +275,8 @@ const Search = () => {
     setSavedSearchLastSearchedAt(null);
     if (activeTab === TAB.ADC) {
       setAdcSourceFilter(ADC_ALL_SOURCES);
-      runAdcSearch(term, 1, ADC_ALL_SOURCES);
+      setAdcDrugStatusFilter([]);
+      runAdcSearch(term, 1, ADC_ALL_SOURCES, []);
     } else {
       setResearchFilters({});
       runResearchSearch(term, 1, {});
@@ -275,7 +292,15 @@ const Search = () => {
     setAdcSourceFilter(source);
     setAdcPeakRelevanceScore(null);
     if (adcHasSearched && searchQuery.trim()) {
-      runAdcSearch(searchQuery, 1, source);
+      runAdcSearch(searchQuery, 1, source, adcDrugStatusFilter);
+    }
+  };
+
+  const handleAdcDrugStatusFilter = (nextSelected) => {
+    setAdcDrugStatusFilter(nextSelected);
+    setAdcPeakRelevanceScore(null);
+    if (adcHasSearched && searchQuery.trim()) {
+      runAdcSearch(searchQuery, 1, adcSourceFilter, nextSelected);
     }
   };
 
@@ -302,7 +327,7 @@ const Search = () => {
   };
 
   const handleAdcPageChange = (page) => {
-    runAdcSearch(searchQuery, page, adcSourceFilter);
+    runAdcSearch(searchQuery, page, adcSourceFilter, adcDrugStatusFilter);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -447,6 +472,8 @@ const Search = () => {
                 error={adcError}
                 selectedSource={adcSourceFilter}
                 onSourceFilter={handleAdcSourceFilter}
+                selectedDrugStatuses={adcDrugStatusFilter}
+                onDrugStatusFilter={handleAdcDrugStatusFilter}
                 onPageChange={handleAdcPageChange}
               />
             ) : (
